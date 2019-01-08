@@ -1,20 +1,20 @@
 package com.example.my32ndapplication;
 
-import android.arch.lifecycle.ViewModelProviders;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-import com.example.my32ndapplication.ui.tw.TwViewModel;
 
 public class TwFragment extends Fragment {
-
+    public static final String LOG_TAG = "32XND";
     public static String TW_FILE_NAME = "com.markqz.tw-fragment-file-name";
     public String tw_file_name;
 
@@ -28,18 +28,20 @@ public class TwFragment extends Fragment {
         return fragment;
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        tw_file_name = (String) getArguments().getString(TW_FILE_NAME);
+       tw_file_name = getArguments().getString(TW_FILE_NAME);
         View v = inflater.inflate(R.layout.tw_fragment, container, false);
 
-        WebView webView = (WebView)   v.findViewById(R.id.webview) ;
+        WebView webView = v.findViewById(R.id.webview) ;
         webView.addJavascriptInterface(new WebAppInterface(getActivity()),"twi");
         WebSettings webSettings = webView.getSettings() ;
+
         webSettings.setJavaScriptEnabled(true);
-        webView.loadUrl( tw_file_name.toString());
+        webView.loadUrl( tw_file_name );
 
         return v ;
     }

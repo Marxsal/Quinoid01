@@ -71,7 +71,7 @@ public class TwActivity extends AppCompatActivity {
         File file = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS), albumName);
         if (!file.mkdirs()) {
-            Log.e(LOG_TAG, "Directory not created");
+            Log.d(LOG_TAG, "Directory not created");
         }
 
         return file.getPath() ;
