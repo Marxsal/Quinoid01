@@ -11,8 +11,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="@string/edit_message"
         android:inputType="textPersonName"
@@ -26,15 +25,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="36dp"
-        android:layout_marginLeft="36dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
         android:onClick="sendMessage"
         android:text="@string/button_send"
-        app:layout_constraintBaseline_toBaselineOf="@+id/editText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/editText" />
+        app:layout_constraintStart_toEndOf="@+id/editText"
+        tools:layout_editor_absoluteY="16dp" />
+
+    <ListView
+        android:id="@+id/listview"
+        android:layout_width="384dp"
+        android:layout_height="431dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText"
+        app:layout_constraintVertical_bias="1.0" />
 
 
 </android.support.constraint.ConstraintLayout>
