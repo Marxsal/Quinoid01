@@ -3,4 +3,7 @@
     <string name="edit_message">Testing 190108-1130</string>
     <string name="button_send">Find TW file</string>
     <string name="action_settings">Settings</string>
+    <string name="button_launch">Unassigned Key</string>
+    <string name="preferences_string">PREFERENCES-STRING</string>
+
 </resources>
