@@ -88,6 +88,7 @@ public class TwActivity extends AppCompatActivity {
     public void selectFile(View view) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("file/*");
+        //intent.setType("text/html");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         // Only the system receives the ACTION_OPEN_DOCUMENT, so no need to test.
         startActivityForResult(intent, REQUEST_FILE_OPEN);
