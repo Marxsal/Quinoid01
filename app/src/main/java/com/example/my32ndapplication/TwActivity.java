@@ -1,5 +1,6 @@
 package com.example.my32ndapplication;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -31,6 +32,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,9 +42,11 @@ import java.util.List;
 import java.util.Set;
 
 public class TwActivity extends AppCompatActivity {
-    public static final String LOG_TAG = "32XND";
+    public static final String LOG_TAG = "32XND-TwActivity";
     public static final String LAUNCH_PAGE = "PagerView Launch Page Position" ;
     public static final String EXTRA_MESSAGE = "com.example.my32ndapplication.MESSAGE";
+    public static final String AUTHORITY = "com.example.my32ndapplication.provider"; // Needed by FileUtils2 and file provider
+
     final int REQUEST_FILE_OPEN = 2 ;
     final int NNF_FILEPICKER = 3 ;
     private ArrayList<TwFile> mTwFiles ;
@@ -132,10 +138,38 @@ public class TwActivity extends AppCompatActivity {
         // But may be good backup as various file-pickers come and go
         if (requestCode == REQUEST_FILE_OPEN && resultCode == RESULT_OK) {
             Uri uriFile = data.getData();
-            Toast.makeText(this,uriFile.toString(),Toast.LENGTH_SHORT).show();
+
+            //Toast.makeText(this,uriFile.toString(),Toast.LENGTH_SHORT).show();
             //EditText editText = findViewById(R.id.editText) ;
             //editText.setText(uriFile.toString());
+            //String test = getContentResolver().uncanonicalize(uriFile).getPath() ;
+
+          /*   //GDRIVE EXPERIMENTS -- ACTUALLY ANDROID 6+ (maybe -- who has file explorer?)
+            String sGdrive = "" ;
+            FileOutputStream outputStream  ;
+            File file = null ;
+            String fileName = "huh" ;
+            // there should be more try/catch
+            try {
+                //file = File.createTempFile("temp", ".html");
+                file = new File(getFilesDir(),"temp.html") ;
+                fileName = "file://" + getFilesDir() + File.separator + file.getName() ;
+                InputStream inputStream = getContentResolver().openInputStream(uriFile) ;
+                outputStream =  openFileOutput(file.getName(),MODE_PRIVATE) ;
+
+                byte[] buf = new byte[1024] ;
+                int len ;
+                while ((len = inputStream.read(buf)) > 0) {
+                    outputStream.write(buf,0,len);
+                }
+                outputStream.flush();
+            } catch(Exception e) {
+                Log.d(LOG_TAG,e.getMessage()) ;
+            }*/
+
+            //TwManager.get(this).addTwFile(new TwFile(uriFile.getLastPathSegment()));
             TwManager.get(this).addTwFile(new TwFile(uriFile.toString()));
+
             // Launch something 2019-01-10 We will need this code in the
             // listview listener, maybe
             ListView listView = findViewById(R.id.listview) ;
@@ -176,6 +210,8 @@ public class TwActivity extends AppCompatActivity {
 
     }
 
+
+
     public void makeToast(String tm) {
         Toast.makeText(this, tm, Toast.LENGTH_SHORT).show();
     }
@@ -198,8 +234,20 @@ public class TwActivity extends AppCompatActivity {
     }
 
 
+
+
+
     public void sendLaunchMessage(View view) {
         // TODO: Make this either launch from list press, or do a check that mTwFiles is populated.
+
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        //intent.setType("file/*");
+        intent.setType("text/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        // Only the system receives the ACTION_OPEN_DOCUMENT, so no need to test.
+        startActivityForResult(intent, REQUEST_FILE_OPEN);
+        //selectFile();
+
        /* TwFile twFile =  mTwFiles.get(0) ;
         Intent intent = new Intent(TwActivity.this, TwPagerActivity.class) ;
         intent.putExtra(TwFragment.TW_FILE_NAME, twFile.getTitle());
