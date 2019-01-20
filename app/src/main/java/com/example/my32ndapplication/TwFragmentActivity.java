@@ -5,10 +5,11 @@ import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 
 public class TwFragmentActivity extends AppCompatActivity {
-
+     static final public String LOG_TAG = "32XND-TFA" ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,5 +24,17 @@ public class TwFragmentActivity extends AppCompatActivity {
                     .add(R.id.fragmentContainer, fragment )
                     .commitNow();
         }
+    }
+
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        super.onAttachFragment(fragment);
+        Log.d(LOG_TAG, "onAttachFragment");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(LOG_TAG, "onDestroy");
     }
 }

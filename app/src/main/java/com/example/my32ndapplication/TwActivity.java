@@ -137,38 +137,45 @@ public class TwActivity extends AppCompatActivity {
         // This code may be obsolete if the file-picker approach works.
         // But may be good backup as various file-pickers come and go
         if (requestCode == REQUEST_FILE_OPEN && resultCode == RESULT_OK) {
+
             Uri uriFile = data.getData();
+
+            // Indicate we really want to keep these documents
+            final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            getContentResolver().takePersistableUriPermission(uriFile,takeFlags);
 
             //Toast.makeText(this,uriFile.toString(),Toast.LENGTH_SHORT).show();
             //EditText editText = findViewById(R.id.editText) ;
             //editText.setText(uriFile.toString());
             //String test = getContentResolver().uncanonicalize(uriFile).getPath() ;
 
-          /*   //GDRIVE EXPERIMENTS -- ACTUALLY ANDROID 6+ (maybe -- who has file explorer?)
-            String sGdrive = "" ;
-            FileOutputStream outputStream  ;
-            File file = null ;
-            String fileName = "huh" ;
+           //GDRIVE EXPERIMENTS -- ACTUALLY ANDROID 6+ (maybe -- who has file explorer?)
+
+           //String fileName = null ;
             // there should be more try/catch
-            try {
-                //file = File.createTempFile("temp", ".html");
-                file = new File(getFilesDir(),"temp.html") ;
-                fileName = "file://" + getFilesDir() + File.separator + file.getName() ;
+  /*          try {
+
+
                 InputStream inputStream = getContentResolver().openInputStream(uriFile) ;
-                outputStream =  openFileOutput(file.getName(),MODE_PRIVATE) ;
+                File file = new File(  getDir("provided",Context.MODE_PRIVATE),uriFile.getLastPathSegment().replace(";","_")) ;
+                fileName = file.getAbsolutePath() ;
+                OutputStream outputStream =  new FileOutputStream(fileName) ;
 
                 byte[] buf = new byte[1024] ;
                 int len ;
                 while ((len = inputStream.read(buf)) > 0) {
                     outputStream.write(buf,0,len);
                 }
-                outputStream.flush();
-            } catch(Exception e) {
-                Log.d(LOG_TAG,e.getMessage()) ;
-            }*/
 
+                outputStream.flush();
+                outputStream.close();
+                inputStream.close();
+            } catch(Exception e) {
+                Log.d(LOG_TAG,"Error: " + e.getMessage()) ;
+            }
+*/
             //TwManager.get(this).addTwFile(new TwFile(uriFile.getLastPathSegment()));
-            TwManager.get(this).addTwFile(new TwFile(uriFile.toString()));
+            TwManager.get(this).addTwFile(new TwFile(this,uriFile.toString()));
 
             // Launch something 2019-01-10 We will need this code in the
             // listview listener, maybe
@@ -199,7 +206,7 @@ public class TwActivity extends AppCompatActivity {
                         path = path.substring(6);
                     }
                     path = "file:///" + path ;
-                    TwManager.get(this).addTwFile(new TwFile(path));
+                    TwManager.get(this).addTwFile(new TwFile(this,path));
                     // Launch something 2019-01-10 We will need this code in the
                     // listview listener, maybe
                     ListView listView = findViewById(R.id.listview);

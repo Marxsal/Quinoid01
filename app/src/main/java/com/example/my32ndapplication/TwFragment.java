@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -51,15 +52,21 @@ public class TwFragment extends Fragment {
        tw_file_name = getArguments().getString(TW_FILE_NAME);
         View v = inflater.inflate(R.layout.tw_fragment, container, false);
 
+        TwFile twFile = TwManager.get(getActivity()).getTwFile(tw_file_name) ;
+        Log.d(LOG_TAG, "I am using id tw_file_name: " + tw_file_name);
+
         WebView webView = v.findViewById(R.id.webview) ;
-        webView.addJavascriptInterface(new WebAppInterface(getActivity()),"twi");
+        webView.addJavascriptInterface(new WebAppInterface(getActivity(),twFile),"twi");
         WebSettings webSettings = webView.getSettings() ;
 
         webSettings.setJavaScriptEnabled(true);
         webView.getSettings().setBuiltInZoomControls(true);
         webView.getSettings().setDisplayZoomControls(false);
-        //webView.loadUrl( tw_file_name );
-        loadTWfromUri(webView, tw_file_name);
+        //twFile.loadFilePath(); // Need to do this in case content: hasn't been loaded
+        String temp = "file:///"+twFile.getUnschemedFilePath() ; // This is probably what we usually call an absolute path
+        Log.d(LOG_TAG, "About to load file " + temp);
+        webView.loadUrl(temp);
+        //loadTWfromUri(webView, tw_file_name);
 
         return v ;
     }
@@ -75,6 +82,29 @@ public class TwFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         //mViewModel = ViewModelProviders.of(this).get(TwViewModel.class);
         // TODO: Use the ViewModel
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(LOG_TAG, "onPause");
+    }
+
+    @Override
+    public void onAttachFragment(Fragment childFragment) {
+        super.onAttachFragment(childFragment);
+        Log.d(LOG_TAG, "onAttachFragment");
+    }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d(LOG_TAG, "onDetach");
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(LOG_TAG, "onDestroy");
     }
 
     /* UTILITIES */

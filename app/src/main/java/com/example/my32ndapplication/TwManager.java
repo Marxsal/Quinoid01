@@ -5,8 +5,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,7 +24,7 @@ public class TwManager {
                 .getStringSet(mAppContext.getString(R.string.preferences_string), stringDefaults);
         int cnt = 0 ;
         for (String s : stringSet) {
-            mTwFiles.add(new TwFile(s));
+            mTwFiles.add(new TwFile(mAppContext,s));
         cnt++ ;
         }
         Log.d(LOG_TAG,"I loaded "+cnt+" files.");
@@ -36,7 +34,7 @@ public class TwManager {
 
         Set<String> stringSet = new HashSet<String>();
         for (TwFile s : mTwFiles) {
-            stringSet.add(s.getFilePath());
+            stringSet.add(s.getId());
         }
         // See if there is a set of TW files to import
         PreferenceManager.getDefaultSharedPreferences(mAppContext).edit().putStringSet(mAppContext.getString(R.string.preferences_string),stringSet).commit() ;
@@ -63,14 +61,27 @@ public class TwManager {
 
     public void addTwFile(TwFile c) {
         for(TwFile x : mTwFiles) {
-            if(c.getFilePath().equals(x.getFilePath())) {
-                Log.d(LOG_TAG, "I think I see file " + c.getFilePath() + " and am exiting.");
+            if(c.getId().equals(x.getId())) {
+                Log.d(LOG_TAG, "I think I see file " + c.getId() + " and am exiting.");
                 return;}
         }
-        Log.d(LOG_TAG, "Adding file " + c.getFilePath());
+        Log.d(LOG_TAG, "Adding file " + c.getId());
         mTwFiles.add(c);
         //saveCrimes();
     }
+
+    public TwFile getTwFile(String id) {
+        Log.d(LOG_TAG,"Getting passed file: " + id  ) ;
+
+        for(TwFile x : mTwFiles) {
+            if(id.equals(x.getId())) {
+                Log.d(LOG_TAG, "getTwFile: I think I see file " + id + " and am returning it.");
+                return x;}
+        }
+        return null ;
+
+    }
+
 
     public void deleteTwFile(TwFile c) {
         mTwFiles.remove(c);

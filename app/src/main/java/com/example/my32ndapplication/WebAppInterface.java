@@ -7,17 +7,20 @@ import android.widget.Toast;
 
 import java.io.FileOutputStream;
 
-public class WebAppInterface {
+public class  WebAppInterface {
     Context mContext ;
-    public static final String LOG_TAG = "32XND";
+    TwFile mTwFile ;
+    public static final String LOG_TAG = "32XND-WebAppInterface";
 
-    WebAppInterface(Context c) {
-        mContext = c;
+    WebAppInterface(Context c, TwFile twFile) {
+        mContext = c; mTwFile = twFile ;
     }
+
     @JavascriptInterface
     public void saveFile(String pathname, String text) {
-        Toast.makeText(mContext,pathname,Toast.LENGTH_SHORT).show();
-        try {
+        //Toast.makeText(mContext,pathname,Toast.LENGTH_SHORT).show();
+        mTwFile.saveFile(text);
+      /*  try {
             //Log.e(LOG_TAG, dir + "/" + filename);
             FileOutputStream outputStream = new FileOutputStream(pathname);
             outputStream.write(text.getBytes());
@@ -25,6 +28,6 @@ public class WebAppInterface {
         } catch (Exception e) {
             Log.d(LOG_TAG, "WAI: error" + e.getMessage());
             e.printStackTrace();
-        }
+        }*/
     }
 }

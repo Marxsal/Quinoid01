@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import java.util.ArrayList;
 
 public class TwPagerActivity extends FragmentActivity {
+    static String LOG_TAG = "32XND-TwPagerActivity";
     private ViewPager mViewPager;
     private ArrayList<TwFile> mTwFiles ;
     @Override
@@ -33,8 +34,7 @@ public class TwPagerActivity extends FragmentActivity {
         @Override
         public TwFragment getItem(int pos) {
             TwFile twFile = mTwFiles.get(pos);
-            Log.d(TwActivity.LOG_TAG, "TPA-sees-file: " + twFile.getFilePath());
-            return TwFragment.newInstance(twFile.getFilePath());
+            return TwFragment.newInstance(twFile.getId());
         }
     });
 
