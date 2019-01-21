@@ -109,7 +109,8 @@ public class TwFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(LOG_TAG, "onPause");
+        TwManager.get(getActivity()).saveTwFilesToJSON();
+        Log.d(LOG_TAG, "onPause - saving to JSON complete.");
     }
 
     @Override

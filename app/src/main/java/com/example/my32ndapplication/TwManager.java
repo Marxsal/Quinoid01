@@ -11,25 +11,29 @@ import java.util.Set;
 
 public class TwManager {
     public static final String LOG_TAG = "32XND-TwManager";
+    public static final String FILENAME = "twfiles.json";
 
     private static TwManager sTwManager;
     private Context mAppContext;
     private ArrayList<TwFile> mTwFiles;
-    private boolean mDirIsClean ;
+    private boolean mDirIsClean;
+    private TwJSONSerializer mSerializer ;
+
 
     public void loadTwFilesFromPreferences() {
+
 
         mTwFiles.clear();
         Set<String> stringDefaults = new HashSet<String>();
         // See if there is a set of TW files to import
         Set<String> stringSet = PreferenceManager.getDefaultSharedPreferences(mAppContext)
                 .getStringSet(mAppContext.getString(R.string.preferences_string), stringDefaults);
-        int cnt = 0 ;
+        int cnt = 0;
         for (String s : stringSet) {
-            mTwFiles.add(new TwFile(mAppContext,s));
-        cnt++ ;
+            mTwFiles.add(new TwFile(mAppContext, s));
+            cnt++;
         }
-        Log.d(LOG_TAG,"I loaded "+cnt+" files.");
+        Log.d(LOG_TAG, "I loaded " + cnt + " files.");
     }
 
     public void saveTwFilesToPreferences() {
@@ -39,8 +43,19 @@ public class TwManager {
             stringSet.add(s.getId());
         }
         // See if there is a set of TW files to import
-        PreferenceManager.getDefaultSharedPreferences(mAppContext).edit().putStringSet(mAppContext.getString(R.string.preferences_string),stringSet).commit() ;
+        PreferenceManager.getDefaultSharedPreferences(mAppContext).edit().putStringSet(mAppContext.getString(R.string.preferences_string), stringSet).commit();
 
+    }
+
+    public boolean saveTwFilesToJSON() {
+        try {
+            mSerializer.saveTwFiles(mTwFiles);
+            Log.d(LOG_TAG, "saveTwFiles() - Files saved to JSON, hopefully");
+            return true;
+        } catch (Exception e) {
+            Log.d(LOG_TAG,"saveTwFiles() - error in saving to JSON: "+ e.getMessage());
+            return false;
+        }
     }
 
 
@@ -48,6 +63,8 @@ public class TwManager {
         mAppContext = app;
         mTwFiles = new ArrayList<TwFile>();
         TwManager.cleanTempDir(app);
+        mSerializer = new TwJSONSerializer(mAppContext, FILENAME);
+
         //mDirIsClean = false ;
         /*
         for (int i = 0; i < 100; i++) {
@@ -64,10 +81,11 @@ public class TwManager {
 
 
     public void addTwFile(TwFile c) {
-        for(TwFile x : mTwFiles) {
-            if(c.getId().equals(x.getId())) {
+        for (TwFile x : mTwFiles) {
+            if (c.getId().equals(x.getId())) {
                 Log.d(LOG_TAG, "I think I see file " + c.getId() + " and am exiting.");
-                return;}
+                return;
+            }
         }
         Log.d(LOG_TAG, "Adding file " + c.getId());
         mTwFiles.add(c);
@@ -75,14 +93,15 @@ public class TwManager {
     }
 
     public TwFile getTwFile(String id) {
-        Log.d(LOG_TAG,"Getting passed file: " + id  ) ;
+        Log.d(LOG_TAG, "Getting passed file: " + id);
 
-        for(TwFile x : mTwFiles) {
-            if(id.equals(x.getId())) {
+        for (TwFile x : mTwFiles) {
+            if (id.equals(x.getId())) {
                 Log.d(LOG_TAG, "getTwFile: I think I see file " + id + " and am returning it.");
-                return x;}
+                return x;
+            }
         }
-        return null ;
+        return null;
 
     }
 

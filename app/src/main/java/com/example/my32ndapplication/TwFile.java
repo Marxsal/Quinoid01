@@ -4,6 +4,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,29 +14,38 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 public class TwFile {
     public static final String LOG_TAG = "32XND-TwFile";
     public static final String DEFAULT_TITLE = "Unk";
 
+    private String mTitle;
+    private String mId;
+    // This is the path to the physical file that we are using in WebView
+    // but without the file:/// part because we need that to create streams
+    // for saving. WebView requires a path with "file:///" in it.
+    private String unschemedFilePath; // Set when loading
+    private Context context;
+    private boolean mIsContentType;
+
+    private static final String JSON_ID = "id";
+    private static final String JSON_TITLE = "title";
 
     // Constructor, I hope
     TwFile(Context context , String resourceString) {
 
         // ***********************************************
         // Start Beta. These are for development only
-        //File tempFile = context.getFilesDir();
+        File tempFile = context.getFilesDir();
 //        File tempFile = context.getDir("provided", Context.MODE_PRIVATE).getAbsoluteFile()  ;
-//        StringBuilder sb = new StringBuilder();
-//        int cnt = 0 ;
-//        for(File reallyTempFile : tempFile.listFiles() ) {
-//            if(reallyTempFile.isFile()) sb.append("F "+reallyTempFile.getName()+"\n") ;
-//            if(reallyTempFile.isDirectory()) sb.append("D "+reallyTempFile.getName()+"\n") ;
-//            cnt++;
-//        }
-//        Log.d(LOG_TAG,sb.toString() + "There were " + Integer.toString(cnt) + " files in temp directory.") ;
+        StringBuilder sb = new StringBuilder();
+        int cnt = 0 ;
+        for(File reallyTempFile : tempFile.listFiles() ) {
+            if(reallyTempFile.isFile()) sb.append("F "+reallyTempFile.getName()+"\n") ;
+            if(reallyTempFile.isDirectory()) sb.append("D "+reallyTempFile.getName()+"\n") ;
+            cnt++;
+        }
+        Log.d(LOG_TAG,sb.toString() + "There were " + Integer.toString(cnt) + " files in temp directory.") ;
 
         // End Beta
         // ***********************************************
@@ -43,19 +55,19 @@ public class TwFile {
         setContext(context);
         mIsContentType = false ;
         setTitle(DEFAULT_TITLE);
-        if(id.startsWith("file")) {
+        if(mId.startsWith("file")) {
             // setUnschemedFilePath will strip off "file"
-            setUnschemedFilePath(id);
+            setUnschemedFilePath(mId);
             return;
         }
-        if(id.startsWith("content")) {
+        if(mId.startsWith("content")) {
             Log.d(LOG_TAG, "About to call loadFilePath");
             mIsContentType = true ;
             loadFilePath() ;
             return ;
         }
         Log.d(LOG_TAG, "I dont think content starts with 'content', so I'll pretend it's a regular file.");
-        setUnschemedFilePath(id);
+        setUnschemedFilePath(mId);
     }
 
 /*
@@ -85,9 +97,9 @@ public class TwFile {
             newFilePath = File.createTempFile("TIDDLYWIKISTUB", ".html",
                    context.getDir("provided", Context.MODE_PRIVATE)).getAbsolutePath() ;
             Log.d(LOG_TAG, "Created file name: " + newFilePath);
-int cnt = 0 ;
+            int cnt = 0 ;  // For DEBUG
             setUnschemedFilePath(newFilePath);
-            Uri uriFile = Uri.parse(id);
+            Uri uriFile = Uri.parse(mId);
             InputStream inputStream = context.getContentResolver().openInputStream(uriFile);
             OutputStream outputStream = new FileOutputStream(newFilePath);
 
@@ -127,7 +139,7 @@ int cnt = 0 ;
 
         if (mIsContentType) {
             try {
-                OutputStream outputStream = context.getContentResolver().openOutputStream(Uri.parse(id));
+                OutputStream outputStream = context.getContentResolver().openOutputStream(Uri.parse(mId));
                 //OutputStream  = new FileOutputStream(newFilePath);
                 Writer writer = new OutputStreamWriter(outputStream, "UTF-8");
                 writer.write(text);
@@ -150,12 +162,12 @@ int cnt = 0 ;
     }
 
     public String getTitle() {
-        return title;
+        return mTitle;
     }
     public void setTitle(String pTitle) {
-       // if(title == null || title.equals(DEFAULT_TITLE)) || title.equals(pTitle){
-            Log.d(LOG_TAG, "Setting title to: " + pTitle);
-          this.title = pTitle;
+       // if(mTitle == null || mTitle.equals(DEFAULT_TITLE)) || mTitle.equals(pTitle){
+            Log.d(LOG_TAG, "Setting mTitle to: " + pTitle);
+          this.mTitle = pTitle;
        // }
     }
 
@@ -168,28 +180,29 @@ int cnt = 0 ;
     }
 
     public String getId() {
-        return id;
+        return mId;
     }
 
     public void setId(String id) {
-        Log.d(LOG_TAG, "Setting id to: " + id);
-        this.id = id;
+        Log.d(LOG_TAG, "Setting mId to: " + id);
+        this.mId = id;
     }
 
-    private String title ;
-    private String id ;
-    // This is the path to the physical file that we are using in WebView
-    // but without the file:/// part because we need that to create streams
-    // for saving. WebView requires a path with "file:///" in it.
-    private String unschemedFilePath; // Set when loading
-    private Context context;
-    private boolean mIsContentType;
+
 
     @Override
     public  String toString() {
-        return title + ": " +
-                id.substring(0,14) + "..." +
-                id.substring(id.length()-14) ;
+        return mTitle + ": " +
+                mId.substring(0,14) + "..." +
+                mId.substring(mId.length()-14) ;
+
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put(JSON_ID, mId.toString());
+        json.put(JSON_TITLE,   mTitle.toString());
+        return json;
 
     }
 }
