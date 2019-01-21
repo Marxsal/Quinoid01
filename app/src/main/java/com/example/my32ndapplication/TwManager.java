@@ -4,16 +4,18 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
 public class TwManager {
-    public static final String LOG_TAG = "32XND";
+    public static final String LOG_TAG = "32XND-TwManager";
 
     private static TwManager sTwManager;
     private Context mAppContext;
     private ArrayList<TwFile> mTwFiles;
+    private boolean mDirIsClean ;
 
     public void loadTwFilesFromPreferences() {
 
@@ -45,6 +47,8 @@ public class TwManager {
     private TwManager(Context app) {
         mAppContext = app;
         mTwFiles = new ArrayList<TwFile>();
+        TwManager.cleanTempDir(app);
+        //mDirIsClean = false ;
         /*
         for (int i = 0; i < 100; i++) {
             TwFile c = new TwFile();
@@ -95,7 +99,17 @@ public class TwManager {
     public static TwManager get(Context c) {
         if (sTwManager == null) {
             sTwManager = new TwManager(c.getApplicationContext());
+
         }
         return sTwManager;
     }
+
+    private static void cleanTempDir(Context cntx) {
+        File tempFile = cntx.getDir("provided", Context.MODE_PRIVATE).getAbsoluteFile();
+        for (File reallyTempFile : tempFile.listFiles()) {
+            Log.d(LOG_TAG, "About to delete file " + reallyTempFile.getName());
+            if (reallyTempFile.isFile()) reallyTempFile.delete();
+        }
+    }
+
 }

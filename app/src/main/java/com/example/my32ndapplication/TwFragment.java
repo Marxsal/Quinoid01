@@ -10,10 +10,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
+import android.util.JsonReader;
+import android.util.JsonToken;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -23,9 +26,11 @@ import android.webkit.WebViewClient;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.Locale;
 
 
@@ -33,6 +38,9 @@ public class TwFragment extends Fragment {
     public static final String LOG_TAG = "32XND-TwFragment";
     public static String TW_FILE_NAME = "com.markqz.tw-fragment-file-name";
     public String tw_file_name;
+    WebView webView;
+    TwFile twFile ;
+    String javascriptEvalResult = "";  // A kluge to get around limits of inner classes
 
     //private TwViewModel mViewModel;
 
@@ -52,24 +60,43 @@ public class TwFragment extends Fragment {
        tw_file_name = getArguments().getString(TW_FILE_NAME);
         View v = inflater.inflate(R.layout.tw_fragment, container, false);
 
-        TwFile twFile = TwManager.get(getActivity()).getTwFile(tw_file_name) ;
+        twFile = TwManager.get(getActivity()).getTwFile(tw_file_name) ;
         Log.d(LOG_TAG, "I am using id tw_file_name: " + tw_file_name);
 
-        WebView webView = v.findViewById(R.id.webview) ;
+        webView = v.findViewById(R.id.webview) ;
         webView.addJavascriptInterface(new WebAppInterface(getActivity(),twFile),"twi");
         WebSettings webSettings = webView.getSettings() ;
 
         webSettings.setJavaScriptEnabled(true);
         webView.getSettings().setBuiltInZoomControls(true);
         webView.getSettings().setDisplayZoomControls(false);
+        final MyAction titleSetter = new MyAction() {
+            @Override
+            void doSomethingWithValue(String useme) {
+                Log.d(LOG_TAG, "Inside myaction, seeing message " + useme);
+                twFile.setTitle(useme);
+            }
+        } ;
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                Log.d(LOG_TAG, "Inside onActivityCreated");
+                String title = loadJavascript ("$tw.wiki.getTiddlerText('$:/SiteTitle')",titleSetter);
+                         }
+        } );
+
+
         //twFile.loadFilePath(); // Need to do this in case content: hasn't been loaded
         String temp = "file:///"+twFile.getUnschemedFilePath() ; // This is probably what we usually call an absolute path
         Log.d(LOG_TAG, "About to load file " + temp);
         webView.loadUrl(temp);
+
         //loadTWfromUri(webView, tw_file_name);
 
         return v ;
     }
+
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,12 +104,6 @@ public class TwFragment extends Fragment {
 
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        //mViewModel = ViewModelProviders.of(this).get(TwViewModel.class);
-        // TODO: Use the ViewModel
-    }
 
 
     @Override
@@ -107,7 +128,61 @@ public class TwFragment extends Fragment {
         Log.d(LOG_TAG, "onDestroy");
     }
 
+
     /* UTILITIES */
+
+    public String loadJavascript(String javascript, final MyAction pMyAction) {
+        Log.d(LOG_TAG, "Receiving javascript message: " + javascript);
+        javascriptEvalResult = "" ;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // In KitKat+ you should use the evaluateJavascript method
+            webView.evaluateJavascript(javascript, new ValueCallback<String>() {
+
+                @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+                @Override
+                public void onReceiveValue(String s) {
+                    Log.d(LOG_TAG, "Inside ValueCallBack seeing string: " + s);
+                    JsonReader reader = new JsonReader(new StringReader(s));
+
+                    // Must set lenient to parse single values
+                    reader.setLenient(true);
+                    try {
+                        if (reader.peek() != JsonToken.NULL) {
+                            if (reader.peek() == JsonToken.STRING) {
+                                String msg = reader.nextString();
+                                Log.d(LOG_TAG, "I think I am returning value " + msg);
+                                if (msg != null) {
+                                    pMyAction.doSomethingWithValue(msg);
+
+                                }
+                            }
+                        }
+                    } catch (IOException e) {
+                        Log.e("TAG", "MainActivity: IOException", e);
+                    } finally {
+                        try {
+                            reader.close();
+                        } catch (IOException e) {
+                            // NOOP
+                        }
+                    }
+                }
+            });
+        } else {
+            /**
+             * For pre-KitKat+ you should use loadUrl("javascript:<JS Code Here>");
+             * To then call back to Java you would need to use addJavascriptInterface()
+             * and have your JS call the interface
+             **/
+             // Leave open for now. Not planning to support <4.4
+            //mWebView.loadUrl("javascript:" + javascript);
+        }
+    return javascriptEvalResult ;
+    }
+
+
+
+    /* NOT USED */
     public void loadTWfromUri(WebView wv, String uriString) {
         //GDRIVE & OTHER ANDROID 6+
         Uri uriFile = Uri.parse(uriString);
@@ -184,3 +259,9 @@ public class TwFragment extends Fragment {
 
 
 }
+
+abstract class MyAction{
+    void doSomethingWithValue(String useme) {
+
+    }
+        }

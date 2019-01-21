@@ -100,17 +100,6 @@ public class TwActivity extends AppCompatActivity {
 
     public void selectFile(View view) {
 
-        /*
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("file/*");
-        //intent.setType("text/html");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        // Only the system receives the ACTION_OPEN_DOCUMENT, so no need to test.
-        startActivityForResult(intent, REQUEST_FILE_OPEN);
-        //selectFile();
-        */
-
-        // This always works
         Intent i = new Intent(this, FilePickerActivity.class);
         // This works if you defined the intent filter
         // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
@@ -144,36 +133,6 @@ public class TwActivity extends AppCompatActivity {
             final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             getContentResolver().takePersistableUriPermission(uriFile,takeFlags);
 
-            //Toast.makeText(this,uriFile.toString(),Toast.LENGTH_SHORT).show();
-            //EditText editText = findViewById(R.id.editText) ;
-            //editText.setText(uriFile.toString());
-            //String test = getContentResolver().uncanonicalize(uriFile).getPath() ;
-
-           //GDRIVE EXPERIMENTS -- ACTUALLY ANDROID 6+ (maybe -- who has file explorer?)
-
-           //String fileName = null ;
-            // there should be more try/catch
-  /*          try {
-
-
-                InputStream inputStream = getContentResolver().openInputStream(uriFile) ;
-                File file = new File(  getDir("provided",Context.MODE_PRIVATE),uriFile.getLastPathSegment().replace(";","_")) ;
-                fileName = file.getAbsolutePath() ;
-                OutputStream outputStream =  new FileOutputStream(fileName) ;
-
-                byte[] buf = new byte[1024] ;
-                int len ;
-                while ((len = inputStream.read(buf)) > 0) {
-                    outputStream.write(buf,0,len);
-                }
-
-                outputStream.flush();
-                outputStream.close();
-                inputStream.close();
-            } catch(Exception e) {
-                Log.d(LOG_TAG,"Error: " + e.getMessage()) ;
-            }
-*/
             //TwManager.get(this).addTwFile(new TwFile(uriFile.getLastPathSegment()));
             TwManager.get(this).addTwFile(new TwFile(this,uriFile.toString()));
 
@@ -182,17 +141,6 @@ public class TwActivity extends AppCompatActivity {
             ListView listView = findViewById(R.id.listview) ;
             ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
 
-            /* THIS IS CODE WE USE TO LAUNCH FRAGMENT WITH WEBVIEW -- IT WORKS.
-            Intent intent = new Intent(TwActivity.this, TwFragmentActivity.class) ;
-            intent.putExtra(TwFragment.TW_FILE_NAME, uriFile.toString());
-            startActivity(intent);
-            /*
-
-            /*WebView webView = (WebView) findViewById(R.id.webview);
-            webView.addJavascriptInterface(new WebAppInterface(this),"twi");
-            WebSettings webSettings = webView.getSettings() ;
-            webSettings.setJavaScriptEnabled(true);
-            webView.loadUrl(uriFile.toString());*/
         }
 
             if (requestCode == NNF_FILEPICKER && resultCode == RESULT_OK) {
@@ -205,7 +153,7 @@ public class TwActivity extends AppCompatActivity {
                     if( rootpos != -1 ) {
                         path = path.substring(6);
                     }
-                    path = "file:///" + path ;
+                    //path = "file:///" + path ;
                     TwManager.get(this).addTwFile(new TwFile(this,path));
                     // Launch something 2019-01-10 We will need this code in the
                     // listview listener, maybe
@@ -227,6 +175,14 @@ public class TwActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         TwManager.get(this).saveTwFilesToPreferences();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(LOG_TAG, "onResume");
+        ListView listView = findViewById(R.id.listview) ;
+        ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
     }
 
     public String getPublicAlbumStorageDir(String albumName) {

@@ -16,14 +16,33 @@ import java.nio.charset.StandardCharsets;
 
 public class TwFile {
     public static final String LOG_TAG = "32XND-TwFile";
+    public static final String DEFAULT_TITLE = "Unk";
+
 
     // Constructor, I hope
     TwFile(Context context , String resourceString) {
+
+        // ***********************************************
+        // Start Beta. These are for development only
+        //File tempFile = context.getFilesDir();
+//        File tempFile = context.getDir("provided", Context.MODE_PRIVATE).getAbsoluteFile()  ;
+//        StringBuilder sb = new StringBuilder();
+//        int cnt = 0 ;
+//        for(File reallyTempFile : tempFile.listFiles() ) {
+//            if(reallyTempFile.isFile()) sb.append("F "+reallyTempFile.getName()+"\n") ;
+//            if(reallyTempFile.isDirectory()) sb.append("D "+reallyTempFile.getName()+"\n") ;
+//            cnt++;
+//        }
+//        Log.d(LOG_TAG,sb.toString() + "There were " + Integer.toString(cnt) + " files in temp directory.") ;
+
+        // End Beta
+        // ***********************************************
+
         Log.d(LOG_TAG, "Constructor: Seeing resource string: " + resourceString);
         setId(resourceString);
         setContext(context);
         mIsContentType = false ;
-
+        setTitle(DEFAULT_TITLE);
         if(id.startsWith("file")) {
             // setUnschemedFilePath will strip off "file"
             setUnschemedFilePath(id);
@@ -133,8 +152,11 @@ int cnt = 0 ;
     public String getTitle() {
         return title;
     }
-    public void setTitle(String title) {
-        this.title = title;
+    public void setTitle(String pTitle) {
+       // if(title == null || title.equals(DEFAULT_TITLE)) || title.equals(pTitle){
+            Log.d(LOG_TAG, "Setting title to: " + pTitle);
+          this.title = pTitle;
+       // }
     }
 
     public Context getContext() {
@@ -165,6 +187,9 @@ int cnt = 0 ;
 
     @Override
     public  String toString() {
-        return id;
+        return title + ": " +
+                id.substring(0,14) + "..." +
+                id.substring(id.length()-14) ;
+
     }
 }
