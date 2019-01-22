@@ -36,6 +36,8 @@ public class TwManager {
         Log.d(LOG_TAG, "I loaded " + cnt + " files.");
     }
 
+
+
     public void saveTwFilesToPreferences() {
 
         Set<String> stringSet = new HashSet<String>();
@@ -61,10 +63,15 @@ public class TwManager {
 
     private TwManager(Context app) {
         mAppContext = app;
-        mTwFiles = new ArrayList<TwFile>();
+
         TwManager.cleanTempDir(app);
         mSerializer = new TwJSONSerializer(mAppContext, FILENAME);
 
+        try {mTwFiles = mSerializer.loadTwFilesFromJSON() ;
+        } catch(Exception e) {
+            mTwFiles = new ArrayList<TwFile>();
+            Log.d(LOG_TAG, "Error loading TwFiles", e);
+        }
         //mDirIsClean = false ;
         /*
         for (int i = 0; i < 100; i++) {

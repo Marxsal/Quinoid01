@@ -5,9 +5,14 @@ import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONTokener;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -40,5 +45,30 @@ public class TwJSONSerializer {
          } finally {
              if(writer!= null) writer.close();
          }
+    }
+
+    public ArrayList<TwFile> loadTwFilesFromJSON() throws IOException, JSONException {
+        ArrayList<TwFile> twFiles = new ArrayList<TwFile>() ;
+        BufferedReader reader = null ;
+        try {
+            InputStream in = mContext.openFileInput(mFilename) ;
+            reader = new BufferedReader(new InputStreamReader(in));
+            StringBuilder sb = new StringBuilder();
+            String jsonString = null ;
+            while ((jsonString = reader.readLine()) !=null ) {
+                sb.append(jsonString);
+            }
+            JSONArray array = (JSONArray) new JSONTokener(jsonString.toString()).nextValue() ;
+            for(int i=0;i<array.length();i++) {
+                twFiles.add(new TwFile(array.getJSONObject(i))) ;
+            }
+
+        } catch (FileNotFoundException e) {
+            // This one will always happen when set up is fresh
+        } finally {
+            if (reader != null) reader.close();
+        }
+
+        return twFiles ;
     }
 }

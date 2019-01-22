@@ -19,7 +19,7 @@ public class  WebAppInterface {
     @JavascriptInterface
     public void saveFile(String pathname, String text) {
         //Toast.makeText(mContext,pathname,Toast.LENGTH_SHORT).show();
-        mTwFile.saveFile(text);
+        mTwFile.saveFile(text,mContext);
       /*  try {
             //Log.e(LOG_TAG, dir + "/" + filename);
             FileOutputStream outputStream = new FileOutputStream(pathname);

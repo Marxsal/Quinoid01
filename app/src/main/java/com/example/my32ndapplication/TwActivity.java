@@ -56,7 +56,8 @@ public class TwActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TwManager.get(this).loadTwFilesFromPreferences();
+        //TwManager.get(this).loadTwFilesFromPreferences();
+
         mTwFiles = TwManager.get(this).getTwFiles() ;
 
         ListView listView = findViewById(R.id.listview) ;
@@ -78,7 +79,8 @@ public class TwActivity extends AppCompatActivity {
         };
        listView.setOnItemClickListener(mMessageClickedHandler);
 
-       // Handle long presses
+        //TODO: 00 Make dialog menu on long press
+        // Handle long presses
         AdapterView.OnItemLongClickListener mItemLongClickListener = new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -99,7 +101,8 @@ public class TwActivity extends AppCompatActivity {
     }
 
     public void selectFile(View view) {
-
+        //TODO: Change to selectLocalFile
+        // TODO: Need to update NNF library to filter out non-HTML files
         Intent i = new Intent(this, FilePickerActivity.class);
         // This works if you defined the intent filter
         // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
@@ -200,8 +203,7 @@ public class TwActivity extends AppCompatActivity {
 
 
 
-    public void sendLaunchMessage(View view) {
-        // TODO: Make this either launch from list press, or do a check that mTwFiles is populated.
+    public void sendLaunchMessage(View view) { //TODO: Change name to selectExplorerFile
 
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         //intent.setType("file/*");

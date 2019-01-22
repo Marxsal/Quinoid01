@@ -25,11 +25,12 @@ public class TwFile {
     // but without the file:/// part because we need that to create streams
     // for saving. WebView requires a path with "file:///" in it.
     private String unschemedFilePath; // Set when loading
-    private Context context;
+//    private Context context;
     private boolean mIsContentType;
 
     private static final String JSON_ID = "id";
     private static final String JSON_TITLE = "title";
+    private static final String JSON_IS_CONTENT = "iscontent";
 
     // Constructor, I hope
     TwFile(Context context , String resourceString) {
@@ -52,7 +53,7 @@ public class TwFile {
 
         Log.d(LOG_TAG, "Constructor: Seeing resource string: " + resourceString);
         setId(resourceString);
-        setContext(context);
+        //setContext(context);
         mIsContentType = false ;
         setTitle(DEFAULT_TITLE);
         if(mId.startsWith("file")) {
@@ -63,31 +64,22 @@ public class TwFile {
         if(mId.startsWith("content")) {
             Log.d(LOG_TAG, "About to call loadFilePath");
             mIsContentType = true ;
-            loadFilePath() ;
+            loadFilePath(context) ;
             return ;
         }
         Log.d(LOG_TAG, "I dont think content starts with 'content', so I'll pretend it's a regular file.");
         setUnschemedFilePath(mId);
     }
 
-/*
-    TwFile(Context context, Uri uri) {
+    // Constructor #2
+    public TwFile(JSONObject json) throws JSONException {
+        mId = json.getString(JSON_ID);
+        mTitle = json.getString(JSON_TITLE);
+        mIsContentType = json.getBoolean(JSON_IS_CONTENT);
 
-        setContext(context);
-
-        try {
-            setId(uri.toString());
-            setFilePath( File.createTempFile("TW",".html",context.getDir("provided",Context.MODE_PRIVATE)).getAbsolutePath() ); ;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //new File(  getDir("provided",Context.MODE_PRIVATE),uri.getLastPathSegment()) ;
-
-        //context.getContentResolver().
     }
-*/
 
-    public void loadFilePath() {
+    public void loadFilePath(Context c) {
         String newFilePath = "IF YOU CAN READ THIS SOMETHING WENT WRONG.";
         // We only need to sources that are content types. At least so far
         if(!mIsContentType) {return; }
@@ -95,12 +87,12 @@ public class TwFile {
         try {
             Log.d(LOG_TAG, "Trying to create file name.");
             newFilePath = File.createTempFile("TIDDLYWIKISTUB", ".html",
-                   context.getDir("provided", Context.MODE_PRIVATE)).getAbsolutePath() ;
+                   c.getDir("provided", Context.MODE_PRIVATE)).getAbsolutePath() ;
             Log.d(LOG_TAG, "Created file name: " + newFilePath);
             int cnt = 0 ;  // For DEBUG
             setUnschemedFilePath(newFilePath);
             Uri uriFile = Uri.parse(mId);
-            InputStream inputStream = context.getContentResolver().openInputStream(uriFile);
+            InputStream inputStream = c.getContentResolver().openInputStream(uriFile);
             OutputStream outputStream = new FileOutputStream(newFilePath);
 
             byte[] buf = new byte[1024];
@@ -125,7 +117,7 @@ public class TwFile {
 
     }
 
-    public void saveFile(String text) {
+    public void saveFile(String text,Context c) {
 
         try {
             Log.d(LOG_TAG, "Attempting to stream to: " + getUnschemedFilePath());
@@ -139,7 +131,7 @@ public class TwFile {
 
         if (mIsContentType) {
             try {
-                OutputStream outputStream = context.getContentResolver().openOutputStream(Uri.parse(mId));
+                OutputStream outputStream = c.getContentResolver().openOutputStream(Uri.parse(mId));
                 //OutputStream  = new FileOutputStream(newFilePath);
                 Writer writer = new OutputStreamWriter(outputStream, "UTF-8");
                 writer.write(text);
@@ -171,13 +163,13 @@ public class TwFile {
        // }
     }
 
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
-    }
+//    public Context getContext() {
+//        return context;
+//    }
+//
+//    public void setContext(Context context) {
+//        this.context = context;
+//    }
 
     public String getId() {
         return mId;
@@ -202,7 +194,10 @@ public class TwFile {
         JSONObject json = new JSONObject();
         json.put(JSON_ID, mId.toString());
         json.put(JSON_TITLE,   mTitle.toString());
+        json.put(JSON_IS_CONTENT, mIsContentType);
         return json;
 
     }
+
+
 }
