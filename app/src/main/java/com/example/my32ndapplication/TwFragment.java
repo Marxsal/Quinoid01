@@ -78,6 +78,12 @@ public class TwFragment extends Fragment {
             }
         } ;
         webView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return true ;
+            }
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 Log.d(LOG_TAG, "Inside onActivityCreated");

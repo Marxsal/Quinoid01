@@ -67,7 +67,9 @@ public class TwManager {
         TwManager.cleanTempDir(app);
         mSerializer = new TwJSONSerializer(mAppContext, FILENAME);
 
-        try {mTwFiles = mSerializer.loadTwFilesFromJSON() ;
+        try {
+            mTwFiles = mSerializer.loadTwFilesFromJSON(app) ;
+            Log.d(LOG_TAG, "Constructor: Files loaded.");
         } catch(Exception e) {
             mTwFiles = new ArrayList<TwFile>();
             Log.d(LOG_TAG, "Error loading TwFiles", e);

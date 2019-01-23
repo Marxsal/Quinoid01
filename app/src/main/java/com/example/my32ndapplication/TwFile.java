@@ -72,10 +72,11 @@ public class TwFile {
     }
 
     // Constructor #2
-    public TwFile(JSONObject json) throws JSONException {
+    public TwFile(Context c, JSONObject json) throws JSONException {
         mId = json.getString(JSON_ID);
         mTitle = json.getString(JSON_TITLE);
         mIsContentType = json.getBoolean(JSON_IS_CONTENT);
+        loadFilePath(c);
 
     }
 

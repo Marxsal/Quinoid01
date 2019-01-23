@@ -47,7 +47,7 @@ public class TwJSONSerializer {
          }
     }
 
-    public ArrayList<TwFile> loadTwFilesFromJSON() throws IOException, JSONException {
+    public ArrayList<TwFile> loadTwFilesFromJSON(Context c) throws IOException, JSONException {
         ArrayList<TwFile> twFiles = new ArrayList<TwFile>() ;
         BufferedReader reader = null ;
         try {
@@ -58,13 +58,14 @@ public class TwJSONSerializer {
             while ((jsonString = reader.readLine()) !=null ) {
                 sb.append(jsonString);
             }
-            JSONArray array = (JSONArray) new JSONTokener(jsonString.toString()).nextValue() ;
+            JSONArray array = (JSONArray) new JSONTokener(sb.toString()).nextValue() ;
             for(int i=0;i<array.length();i++) {
-                twFiles.add(new TwFile(array.getJSONObject(i))) ;
+                twFiles.add(new TwFile(c,array.getJSONObject(i))) ;
             }
 
         } catch (FileNotFoundException e) {
             // This one will always happen when set up is fresh
+            Log.d(LOG_TAG, "loadTwFilesFromJSON - failure: " + e.getMessage());
         } finally {
             if (reader != null) reader.close();
         }

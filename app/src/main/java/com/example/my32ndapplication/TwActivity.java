@@ -183,7 +183,8 @@ public class TwActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(LOG_TAG, "onResume");
+        TwManager.get(this).saveTwFilesToJSON();
+        Log.d(LOG_TAG, "onResume - saving to JSON complete.");
         ListView listView = findViewById(R.id.listview) ;
         ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
     }
@@ -207,7 +208,12 @@ public class TwActivity extends AppCompatActivity {
 
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         //intent.setType("file/*");
-        intent.setType("text/*");
+intent.setType("text/*") ;
+        //intent.setType("text/html,text/htm,text.txt,html/tw");
+        //intent.setType("*/*");
+//        String[] mimetypes = {"text/html", "text/htm", "html/tw"};
+//        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+//        
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         // Only the system receives the ACTION_OPEN_DOCUMENT, so no need to test.
         startActivityForResult(intent, REQUEST_FILE_OPEN);
