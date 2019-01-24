@@ -213,7 +213,7 @@ intent.setType("text/*") ;
         //intent.setType("*/*");
 //        String[] mimetypes = {"text/html", "text/htm", "html/tw"};
 //        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-//        
+//
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         // Only the system receives the ACTION_OPEN_DOCUMENT, so no need to test.
         startActivityForResult(intent, REQUEST_FILE_OPEN);
