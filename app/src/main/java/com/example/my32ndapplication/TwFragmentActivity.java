@@ -29,12 +29,12 @@ public class TwFragmentActivity extends AppCompatActivity {
     @Override
     public void onAttachFragment(Fragment fragment) {
         super.onAttachFragment(fragment);
-        Log.d(LOG_TAG, "onAttachFragment");
+        //Log.d(LOG_TAG, "onAttachFragment");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(LOG_TAG, "onDestroy");
+        //Log.d(LOG_TAG, "onDestroy");
     }
 }

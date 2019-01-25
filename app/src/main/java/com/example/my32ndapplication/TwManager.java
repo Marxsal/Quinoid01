@@ -33,7 +33,7 @@ public class TwManager {
             mTwFiles.add(new TwFile(mAppContext, s));
             cnt++;
         }
-        Log.d(LOG_TAG, "I loaded " + cnt + " files.");
+        //Log.d(LOG_TAG, "I loaded " + cnt + " files.");
     }
 
 
@@ -52,10 +52,10 @@ public class TwManager {
     public boolean saveTwFilesToJSON() {
         try {
             mSerializer.saveTwFiles(mTwFiles);
-            Log.d(LOG_TAG, "saveTwFiles() - Files saved to JSON, hopefully");
+            //Log.d(LOG_TAG, "saveTwFiles() - Files saved to JSON, hopefully");
             return true;
         } catch (Exception e) {
-            Log.d(LOG_TAG,"saveTwFiles() - error in saving to JSON: "+ e.getMessage());
+            Log.d(LOG_TAG,"saveTwFiles() - ERR in saving to JSON: "+ e.getMessage());
             return false;
         }
     }
@@ -69,10 +69,10 @@ public class TwManager {
 
         try {
             mTwFiles = mSerializer.loadTwFilesFromJSON(app) ;
-            Log.d(LOG_TAG, "Constructor: Files loaded.");
+            //Log.d(LOG_TAG, "Constructor: Files loaded.");
         } catch(Exception e) {
             mTwFiles = new ArrayList<TwFile>();
-            Log.d(LOG_TAG, "Error loading TwFiles", e);
+            Log.d(LOG_TAG, "ERR loading TwFiles", e);
         }
         //mDirIsClean = false ;
         /*
@@ -92,21 +92,21 @@ public class TwManager {
     public void addTwFile(TwFile c) {
         for (TwFile x : mTwFiles) {
             if (c.getId().equals(x.getId())) {
-                Log.d(LOG_TAG, "I think I see file " + c.getId() + " and am exiting.");
+                //Log.d(LOG_TAG, "I think I see file " + c.getId() + " and am exiting.");
                 return;
             }
         }
-        Log.d(LOG_TAG, "Adding file " + c.getId());
+        //Log.d(LOG_TAG, "Adding file " + c.getId());
         mTwFiles.add(c);
         //saveCrimes();
     }
 
     public TwFile getTwFile(String id) {
-        Log.d(LOG_TAG, "Getting passed file: " + id);
+        //Log.d(LOG_TAG, "Getting passed file: " + id);
 
         for (TwFile x : mTwFiles) {
             if (id.equals(x.getId())) {
-                Log.d(LOG_TAG, "getTwFile: I think I see file " + id + " and am returning it.");
+                //Log.d(LOG_TAG, "getTwFile: I think I see file " + id + " and am returning it.");
                 return x;
             }
         }
@@ -135,9 +135,19 @@ public class TwManager {
     private static void cleanTempDir(Context cntx) {
         File tempFile = cntx.getDir("provided", Context.MODE_PRIVATE).getAbsoluteFile();
         for (File reallyTempFile : tempFile.listFiles()) {
-            Log.d(LOG_TAG, "About to delete file " + reallyTempFile.getName());
+            //Log.d(LOG_TAG, "About to delete file " + reallyTempFile.getName());
             if (reallyTempFile.isFile()) reallyTempFile.delete();
         }
+    }
+
+    public boolean anyFileBased() {
+        int cnt = 0;
+        for (TwFile x : mTwFiles) {
+            if (! x.isIsContentType()) cnt++ ;
+        }
+        //Log.d(LOG_TAG, "Just counted " + cnt + " file-type files");
+        if(mTwFiles.size()>0 && cnt > 0 ) return true ;
+        return false ;
     }
 
 }

@@ -25,7 +25,12 @@ public class TwFile {
     // but without the file:/// part because we need that to create streams
     // for saving. WebView requires a path with "file:///" in it.
     private String unschemedFilePath; // Set when loading
-//    private Context context;
+
+    public boolean isIsContentType() {
+        return mIsContentType;
+    }
+
+    //    private Context context;
     private boolean mIsContentType;
 
     private static final String JSON_ID = "id";
@@ -46,12 +51,12 @@ public class TwFile {
             if(reallyTempFile.isDirectory()) sb.append("D "+reallyTempFile.getName()+"\n") ;
             cnt++;
         }
-        Log.d(LOG_TAG,sb.toString() + "There were " + Integer.toString(cnt) + " files in temp directory.") ;
+        //Log.d(LOG_TAG,sb.toString() + "There were " + Integer.toString(cnt) + " files in temp directory.") ;
 
         // End Beta
         // ***********************************************
 
-        Log.d(LOG_TAG, "Constructor: Seeing resource string: " + resourceString);
+        //Log.d(LOG_TAG, "Constructor: Seeing resource string: " + resourceString);
         setId(resourceString);
         //setContext(context);
         mIsContentType = false ;
@@ -62,12 +67,14 @@ public class TwFile {
             return;
         }
         if(mId.startsWith("content")) {
-            Log.d(LOG_TAG, "About to call loadFilePath");
+            //Log.d(LOG_TAG, "About to call loadFilePath");
             mIsContentType = true ;
             loadFilePath(context) ;
             return ;
         }
-        Log.d(LOG_TAG, "I dont think content starts with 'content', so I'll pretend it's a regular file.");
+
+
+        //Log.d(LOG_TAG, "I dont think content starts with 'content', so I'll pretend it's a regular file.");
         setUnschemedFilePath(mId);
     }
 
@@ -77,7 +84,7 @@ public class TwFile {
         mTitle = json.getString(JSON_TITLE);
         mIsContentType = json.getBoolean(JSON_IS_CONTENT);
         loadFilePath(c);
-
+        if(!mId.startsWith("content")) setUnschemedFilePath(mId);
     }
 
     public void loadFilePath(Context c) {
@@ -86,10 +93,10 @@ public class TwFile {
         if(!mIsContentType) {return; }
 
         try {
-            Log.d(LOG_TAG, "Trying to create file name.");
+            //Log.d(LOG_TAG, "Trying to create file name.");
             newFilePath = File.createTempFile("TIDDLYWIKISTUB", ".html",
                    c.getDir("provided", Context.MODE_PRIVATE)).getAbsolutePath() ;
-            Log.d(LOG_TAG, "Created file name: " + newFilePath);
+            //Log.d(LOG_TAG, "Created file name: " + newFilePath);
             int cnt = 0 ;  // For DEBUG
             setUnschemedFilePath(newFilePath);
             Uri uriFile = Uri.parse(mId);
@@ -106,7 +113,7 @@ public class TwFile {
             outputStream.flush();
             outputStream.close();
             inputStream.close();
-            Log.d(LOG_TAG, "I counted " + cnt + "k bytes");
+            //Log.d(LOG_TAG, "I counted " + cnt + "k bytes");
         } catch (IOException e) {
             Log.d(LOG_TAG, "IOException: " + e.getMessage());
             e.printStackTrace();
@@ -114,19 +121,19 @@ public class TwFile {
         } catch (Exception e) {
             Log.e(LOG_TAG, "Something not an IOE happened: " + e.getMessage());
         }
-        Log.d(LOG_TAG, "I think I've successfully initialzed working file " + getUnschemedFilePath());
+        //Log.d(LOG_TAG, "I think I've successfully initialzed working file " + getUnschemedFilePath());
 
     }
 
     public void saveFile(String text,Context c) {
 
         try {
-            Log.d(LOG_TAG, "Attempting to stream to: " + getUnschemedFilePath());
+            //Log.d(LOG_TAG, "Attempting to stream to: " + getUnschemedFilePath());
             FileOutputStream outputStream = new FileOutputStream(getUnschemedFilePath());
             outputStream.write(text.getBytes());
             outputStream.close();
         } catch (Exception e) {
-            Log.d(LOG_TAG, "IOE?: See stacktrace." + e.getMessage());
+            //Log.d(LOG_TAG, "IOE?: See stacktrace." + e.getMessage());
             e.printStackTrace();
         }
 
@@ -138,14 +145,15 @@ public class TwFile {
                 writer.write(text);
                 writer.close();
             } catch (IOException e) {
-                Log.d(LOG_TAG, "Err trying to write to original system file.");
+                Log.d(LOG_TAG, "saveFile ERR trying to write to original system file.");
             }
         }
     }
 
     public void setUnschemedFilePath(String filePath) {
-        Log.d(LOG_TAG, "Setting file path: " + filePath);
+        Log.d(LOG_TAG, "719X Before setting file path: " + filePath);
         filePath = filePath.replaceFirst("^file:/+","/") ;
+        Log.d(LOG_TAG, "719X After setting file path: " + filePath);
         this.unschemedFilePath = filePath;
     }
 
@@ -159,7 +167,7 @@ public class TwFile {
     }
     public void setTitle(String pTitle) {
        // if(mTitle == null || mTitle.equals(DEFAULT_TITLE)) || mTitle.equals(pTitle){
-            Log.d(LOG_TAG, "Setting mTitle to: " + pTitle);
+            //Log.d(LOG_TAG, "Setting mTitle to: " + pTitle);
           this.mTitle = pTitle;
        // }
     }
@@ -177,7 +185,7 @@ public class TwFile {
     }
 
     public void setId(String id) {
-        Log.d(LOG_TAG, "Setting mId to: " + id);
+        //Log.d(LOG_TAG, "Setting mId to: " + id);
         this.mId = id;
     }
 
