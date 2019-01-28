@@ -31,10 +31,13 @@ public class TwJSONSerializer {
 
      public void saveTwFiles(ArrayList<TwFile> twFiles) throws JSONException, IOException {
          JSONArray array = new JSONArray() ;
+         Log.d(LOG_TAG, "saveTwFiles: Loading array...") ;
          for (TwFile tw : twFiles) {
              array.put(tw.toJSON()) ;
          }
-        // Write to internal storage
+         Log.d(LOG_TAG, "saveTwFiles: Finished loading array...");
+
+         // Write to internal storage
         // This first draft doesn't allow specifying directory. Problem?
          Writer writer = null ;
          try {

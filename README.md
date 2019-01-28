@@ -1,4 +1,4 @@
-# Quinoid01
+# Quinoid
 
 **Application to use TiddlyWiki on Android**
 
@@ -24,7 +24,9 @@ especially careful when dealing with files on GDrive or other synchronized platf
 In all cases, it is up to you to properly backup and secure your files.
 
 ## Usage Notes
-Note that there are two file selection mechanisms. "File Explorer" and "System Exlorer". __File Explorer_ will probably only work
+Note that there are two file selection mechanisms. "File Explorer" and "System Exlorer". __File Explorer__ will probably only work
 with files that Android considers "internal". This is due to changes in Android permissons starting with Android 4.4.
 However, the __File Explorer__ is probably more efficient than __System Explorer__, so if you can get it to work that might be the first choice. In future editions,
 the __File Explorer__ may be disabled for Android 5 and greater.
+
+A long press on the line item in the list view will bring up a dialog where you can change the display name (not the internal TiddlyWiki name), mark the file as browsable, or mark the file to be removed (in which case, the file will be removed as soon as you confirm your choice).

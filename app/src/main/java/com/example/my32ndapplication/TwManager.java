@@ -55,7 +55,7 @@ public class TwManager {
             //Log.d(LOG_TAG, "saveTwFiles() - Files saved to JSON, hopefully");
             return true;
         } catch (Exception e) {
-            Log.d(LOG_TAG,"saveTwFiles() - ERR in saving to JSON: "+ e.getMessage());
+            Log.d(LOG_TAG,"saveTwFilesToJSON() - ERR in saving to JSON: "+ e.getMessage());
             return false;
         }
     }
@@ -112,6 +112,23 @@ public class TwManager {
         }
         return null;
 
+    }
+
+    public ArrayList<TwFile> getBrowsableFiles() {
+        //Log.d(LOG_TAG, "Getting passed file: " + id);
+        ArrayList<TwFile> browsables = new ArrayList<TwFile>();
+        for (TwFile x : mTwFiles) {
+            if (x.isBrowsable()) {
+                browsables.add(x);
+            }
+        }
+        return browsables;
+
+    }
+
+
+    public TwFile getTwFile(int index) {
+        return mTwFiles.get(index);
     }
 
 

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class TwPagerActivity extends FragmentActivity {
     static String LOG_TAG = "32XND-TwPagerActivity";
     private ViewPager mViewPager;
-    private ArrayList<TwFile> mTwFiles ;
+    private ArrayList<TwFile> mTwBrowsableFiles ;
     @Override
     public void onCreate(Bundle savedlnstanceState) {
         super.onCreate(savedlnstanceState);
@@ -24,19 +24,20 @@ public class TwPagerActivity extends FragmentActivity {
         mViewPager = new ViewPager(this);
         mViewPager.setId(R.id.viewPager);
         setContentView (mViewPager) ;
-        mTwFiles = TwManager.get(this).getTwFiles() ;
+        mTwBrowsableFiles = TwManager.get(this).getBrowsableFiles() ;
         FragmentManager fm = getSupportFragmentManager();
         mViewPager.setAdapter(new FragmentStatePagerAdapter(fm) {
-        @Override
-        public int getCount() {
-            return mTwFiles.size();
-        }
-        @Override
-        public TwFragment getItem(int pos) {
-            TwFile twFile = mTwFiles.get(pos);
-            return TwFragment.newInstance(twFile.getId());
-        }
-    });
+            @Override
+            public int getCount() {
+                return mTwBrowsableFiles.size();
+            }
+
+            @Override
+            public TwFragment getItem(int pos) {
+                TwFile twFile = mTwBrowsableFiles.get(pos);
+                return TwFragment.newInstance(twFile.getId());
+            }
+        });
 
         mViewPager.setCurrentItem(position);
     }

@@ -17,27 +17,49 @@ import java.io.Writer;
 
 public class TwFile {
     public static final String LOG_TAG = "32XND-TwFile";
-    public static final String DEFAULT_TITLE = "Unk";
+    public static final String DEFAULT_TITLE = "(Title unknown)";
+    private static final String JSON_ID = "id";
+    private static final String JSON_TITLE = "title";
+    private static final String JSON_IS_CONTENT = "iscontent";
+    private static final String JSON_IS_BROWSABLE = "isbrowsable";
+    private static final String JSON_DISPLAY_TITLE = "displaytitle";
 
-    private String mTitle;
+    private String mTitle = DEFAULT_TITLE;
     private String mId;
+    private String mDisplay ="" ;  // User-provided name to display in list
+    private boolean mIsContentType;     //    private Context context;
+    private boolean mIsBrowsable ; // Will we be loading a page for this item?
+
     // This is the path to the physical file that we are using in WebView
     // but without the file:/// part because we need that to create streams
     // for saving. WebView requires a path with "file:///" in it.
     private String unschemedFilePath; // Set when loading
 
+    public String getDisplayName() {
+        return mDisplay;
+    }
+
+    public void setDisplayName(String mDisplay) {
+        this.mDisplay = mDisplay;
+    }
+
+    public boolean isBrowsable() {
+        return mIsBrowsable;
+    }
+
+    public void setIsBrowsable(boolean mIsBrowsable) {
+        this.mIsBrowsable = mIsBrowsable;
+    }
+
     public boolean isIsContentType() {
         return mIsContentType;
     }
 
-    //    private Context context;
-    private boolean mIsContentType;
 
-    private static final String JSON_ID = "id";
-    private static final String JSON_TITLE = "title";
-    private static final String JSON_IS_CONTENT = "iscontent";
 
-    // Constructor, I hope
+
+    // Constructor, I hope. Used when resource/filepath is first selected
+    // from pick list.
     TwFile(Context context , String resourceString) {
 
         // ***********************************************
@@ -61,6 +83,8 @@ public class TwFile {
         //setContext(context);
         mIsContentType = false ;
         setTitle(DEFAULT_TITLE);
+        setIsBrowsable(true);
+
         if(mId.startsWith("file")) {
             // setUnschemedFilePath will strip off "file"
             setUnschemedFilePath(mId);
@@ -73,7 +97,6 @@ public class TwFile {
             return ;
         }
 
-
         //Log.d(LOG_TAG, "I dont think content starts with 'content', so I'll pretend it's a regular file.");
         setUnschemedFilePath(mId);
     }
@@ -83,6 +106,8 @@ public class TwFile {
         mId = json.getString(JSON_ID);
         mTitle = json.getString(JSON_TITLE);
         mIsContentType = json.getBoolean(JSON_IS_CONTENT);
+        mDisplay = json.getString(JSON_DISPLAY_TITLE);
+        mIsBrowsable = json.getBoolean(JSON_IS_BROWSABLE);
         loadFilePath(c);
         if(!mId.startsWith("content")) setUnschemedFilePath(mId);
     }
@@ -193,7 +218,10 @@ public class TwFile {
 
     @Override
     public  String toString() {
-        return mTitle + ": " +
+        Log.d(LOG_TAG, "toString: I think display is this length: " + getDisplayName().length());
+        if (getDisplayName() != null && getDisplayName().length() > 1 ) return getDisplayName() ;
+        if( getTitle() != null && !getTitle().startsWith(DEFAULT_TITLE)) return getTitle() ;
+        return DEFAULT_TITLE + ": " +
                 mId.substring(0,14) + "..." +
                 mId.substring(mId.length()-14) ;
 
@@ -204,6 +232,8 @@ public class TwFile {
         json.put(JSON_ID, mId.toString());
         json.put(JSON_TITLE,   mTitle.toString());
         json.put(JSON_IS_CONTENT, mIsContentType);
+        json.put(JSON_DISPLAY_TITLE, mDisplay.toString());
+        json.put(JSON_IS_BROWSABLE, mIsBrowsable);
         return json;
 
     }

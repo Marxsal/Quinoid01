@@ -15,6 +15,13 @@
         <item name="windowActionBarOverlay">true</item>
     </style>
 
+    <style name="CheckBoxGray" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/mygray</item>
+        <item name="colorControlActivated">@color/mygray</item>
+
+    </style>
+
+    
     <!-- You can also inherit from NNF_BaseTheme.Light -->
     <style name="FilePickerTheme" parent="NNF_BaseTheme">
         <!-- Set these to match your theme -->

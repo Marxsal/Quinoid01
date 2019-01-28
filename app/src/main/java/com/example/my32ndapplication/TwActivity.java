@@ -12,20 +12,24 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 //import android.widget.ListView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nononsenseapps.filepicker.FilePickerActivity;
@@ -46,8 +50,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class TwActivity extends AppCompatActivity {
+public class TwActivity extends AppCompatActivity implements TwDialogFragment.TwDialogFragmentListener {
     public static final String LOG_TAG = "32XND-TwActivity";
+    public static final String DIALOG_TAG = "FirstDialogTag";
     public static final String LAUNCH_PAGE = "PagerView Launch Page Position" ;
     public static final String EXTRA_MESSAGE = "com.example.my32ndapplication.MESSAGE";
     public static final String AUTHORITY = "com.example.my32ndapplication.provider"; // Needed by FileUtils2 and file provider
@@ -67,8 +72,10 @@ public class TwActivity extends AppCompatActivity {
         mTwFiles = TwManager.get(this).getTwFiles() ;
 
         ListView listView = findViewById(R.id.listview) ;
-        ArrayAdapter<TwFile> adapter =
-                new ArrayAdapter<TwFile>(this, android.R.layout.simple_list_item_1, mTwFiles);
+//        ArrayAdapter<TwFile> adapter =
+//                new ArrayAdapter<TwFile>(this, android.R.layout.simple_list_item_1, mTwFiles);
+        TwFileAdapter adapter =
+                new TwFileAdapter(mTwFiles) ;
 
         listView.setAdapter(adapter);
 
@@ -99,7 +106,11 @@ public class TwActivity extends AppCompatActivity {
         AdapterView.OnItemLongClickListener mItemLongClickListener = new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                TwManager.get(TwActivity.this).deleteTwFile(i);
+
+//                TwManager.get(TwActivity.this).deleteTwFile(i);
+
+                TwDialogFragment dialogFragment = TwDialogFragment.newInstance(i);
+                dialogFragment.show(getSupportFragmentManager(), DIALOG_TAG);
                 ListView listView = findViewById(R.id.listview) ;
                 ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
                 return true;
@@ -209,7 +220,9 @@ public class TwActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        TwManager.get(this).saveTwFilesToPreferences();
+        Log.d(LOG_TAG, "TA:onPause ");
+        //TwManager.get(this).saveTwFilesToPreferences();
+        TwManager.get(this).saveTwFilesToJSON();
     }
 
     @Override
@@ -256,4 +269,42 @@ intent.setType("text/*") ;
         intent.putExtra(TwFragment.TW_FILE_NAME, twFile.getTitle());
         startActivity(intent);*/
     }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        // Nothing really to do, yet
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        Log.d(LOG_TAG, "TA-onDialogPositiveClick: I see display title");
+        notifyListAdapter();
+    }
+
+    public void notifyListAdapter() {
+        ListView listView = findViewById(R.id.listview);
+        ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
+    }
+
+    private class TwFileAdapter extends ArrayAdapter<TwFile> {
+
+        public TwFileAdapter(ArrayList<TwFile> twFiles) {
+            super(TwActivity.this, 0, twFiles);
+        }
+
+        @Override
+        public View getView(int position,  View convertView,  ViewGroup parent) {
+            if (convertView == null) {
+                convertView = getLayoutInflater().inflate(R.layout.list_item, null);
+            }
+            TwFile twFile = mTwFiles.get(position);
+            TextView titleView = (TextView) convertView.findViewById(R.id.itemtitle) ;
+            titleView.setText(twFile.toString());
+            CheckBox checkBoxBrowse = (CheckBox) convertView.findViewById(R.id.checkboxBrowse);
+            checkBoxBrowse.setChecked(twFile.isBrowsable());
+            return convertView;
+        }
+    }
+
 }
+
