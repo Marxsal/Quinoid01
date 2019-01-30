@@ -152,10 +152,21 @@ public class TwFragment extends Fragment {
 
         webView.setWebViewClient(new WebViewClient() {
 
+
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if(url.startsWith("http")) {
+                    Log.d(LOG_TAG, "Attempt to start " + url);
+
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(intent);
+                    return true;
+                }
                 return true ;
             }
+
+
+
 
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -446,11 +457,19 @@ public class TwFragment extends Fragment {
         //wv.loadDataWithBaseURL("", encodedHtml, "text/html", "base64", "");
     } // LOAD TW FROM URI
 
+    /* NOT USED ?? */
     private class MyWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
              // Let's try overriding everything
-            //Log.d(LOG_TAG, "Attempt to use resource " + url);
+            Log.d(LOG_TAG, "Attempt to use resource " + url);
+            if(url.startsWith("http")) {
+                Log.d(LOG_TAG, "Attempt to start " + url);
+
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+                return true;
+            }
             return true;
         }
 
