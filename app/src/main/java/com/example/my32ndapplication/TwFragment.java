@@ -148,6 +148,16 @@ public class TwFragment extends Fragment {
                 twFile.setTitle(useme);
             }
         } ;
+        final MyAction iconSetter = new MyAction() {
+            @Override
+            void doSomethingWithValue(String useme) {
+                Log.d(LOG_TAG, "Inside myaction iconSetter, seeing message " + useme);
+
+                twFile.makeIconAndPath(getActivity(),useme);
+                //twFile.setTitle(useme);
+            }
+        } ;
+
 
 
         webView.setWebViewClient(new WebViewClient() {
@@ -171,7 +181,13 @@ public class TwFragment extends Fragment {
             @Override
             public void onPageFinished(WebView view, String url) {
                 //Log.d(LOG_TAG, "Inside onActivityCreated");
-                String title = loadJavascript ("$tw.wiki.getTiddlerText('$:/SiteTitle')",titleSetter);
+                twFile.setTitle(view.getTitle());
+                //Log.d(LOG_TAG, "EXP1: Seeing title: " + view.getTitle());
+                //String title = loadJavascript ("$tw.wiki.getTiddlerText('$:/SiteTitle')",titleSetter);
+                String icoText = loadJavascript ("$tw.wiki.getTiddlerText('$:/favicon.ico')",iconSetter);
+//twFile.makeIconAndPath(getActivity(),icoText);
+                  //view.getFavicon()
+                //twFile.saveIconPath(getActivity(),view.getFavicon());
                          }
         } );
 

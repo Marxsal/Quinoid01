@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -27,6 +30,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 //import android.widget.ListView;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -302,6 +306,11 @@ intent.setType("text/*") ;
             titleView.setText(twFile.toString());
             CheckBox checkBoxBrowse = (CheckBox) convertView.findViewById(R.id.checkboxBrowse);
             checkBoxBrowse.setChecked(twFile.isBrowsable());
+            if(twFile.getIconPath() != null && !twFile.getIconPath().isEmpty()) {
+               ImageView imageView = (ImageView) convertView.findViewById(R.id.iconView);
+               Bitmap bitmap = BitmapFactory.decodeFile(twFile.getIconPath()) ;
+               imageView.setImageBitmap(bitmap);
+            }
             return convertView;
         }
     }

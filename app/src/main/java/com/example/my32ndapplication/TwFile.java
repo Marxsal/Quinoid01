@@ -1,7 +1,10 @@
 package com.example.my32ndapplication;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -14,6 +17,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.UUID;
 
 public class TwFile {
     public static final String LOG_TAG = "32XND-TwFile";
@@ -23,12 +27,14 @@ public class TwFile {
     private static final String JSON_IS_CONTENT = "iscontent";
     private static final String JSON_IS_BROWSABLE = "isbrowsable";
     private static final String JSON_DISPLAY_TITLE = "displaytitle";
+    private static final String JSON_ICON_PATH = "iconpath";
 
     private String mTitle = DEFAULT_TITLE;
     private String mId;
     private String mDisplay ="" ;  // User-provided name to display in list
     private boolean mIsContentType;     //    private Context context;
     private boolean mIsBrowsable ; // Will we be loading a page for this item?
+    private String mIconPath = "" ;
 
     // This is the path to the physical file that we are using in WebView
     // but without the file:/// part because we need that to create streams
@@ -108,6 +114,7 @@ public class TwFile {
         mIsContentType = json.getBoolean(JSON_IS_CONTENT);
         mDisplay = json.getString(JSON_DISPLAY_TITLE);
         mIsBrowsable = json.getBoolean(JSON_IS_BROWSABLE);
+        mIconPath = json.getString(JSON_ICON_PATH);
         loadFilePath(c);
         if(!mId.startsWith("content")) setUnschemedFilePath(mId);
     }
@@ -215,6 +222,39 @@ public class TwFile {
     }
 
 
+    public String getIconPath() {
+        return mIconPath;
+    }
+
+    public void makeIconAndPath(Context c, String bitmap64String) {
+        Log.d(LOG_TAG, "saveIconPath " );
+        // I use 'save' because it's doing more than just setting in some cases.
+        if( bitmap64String != null) {
+            String iconPath = getIconPath() ;
+            if (iconPath == null || iconPath.isEmpty())  iconPath =
+                    c.getDir("icons",c.MODE_PRIVATE).getAbsolutePath() + File.separator + "ico" + UUID.randomUUID().toString() + ".png";
+            File iconFile = new File(iconPath);
+            //Log.d(LOG_TAG, "I am using icon name (abs): " + iconFile.getAbsolutePath());
+
+            byte[] decoded = Base64.decode(bitmap64String, Base64.DEFAULT);
+            //Log.d(LOG_TAG, "After decode: " + decoded.toString());
+            //Log.d(LOG_TAG, "Decode length was: " + decoded.length);
+            Bitmap bm = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+            try {
+                //Log.d(LOG_TAG, "I am using icon name (can): " + iconFile.getCanonicalPath());
+                FileOutputStream fOS = new FileOutputStream(iconPath);
+                bm.compress(Bitmap.CompressFormat.PNG, 100, fOS);
+                fOS.close();
+                mIconPath = iconPath ;
+            } catch (Exception e) {
+                //Log.d(LOG_TAG, "Writing to icon got exception: " + e.getMessage());
+                e.printStackTrace(); //DEBUG
+            }
+
+            //bm.compress(Bitmap.CompressFormat.PNG,)
+        }
+    }
+
 
     @Override
     public  String toString() {
@@ -234,7 +274,10 @@ public class TwFile {
         json.put(JSON_IS_CONTENT, mIsContentType);
         json.put(JSON_DISPLAY_TITLE, mDisplay.toString());
         json.put(JSON_IS_BROWSABLE, mIsBrowsable);
+        json.put(JSON_ICON_PATH, mIconPath.toString());
+
         return json;
+
 
     }
 
