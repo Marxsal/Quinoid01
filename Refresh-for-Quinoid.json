@@ -1,0 +1,10 @@
+[
+    {
+        "created": "20190205225012670",
+        "title": "Refresh-for-Quinoid",
+        "type": "application/x-tiddler",
+        "modified": "20190207002008555",
+        "tags": "$:/tags/RawMarkup",
+        "text": "<script>\n\n// Listen for the tm-browser-refresh message\n\t\t$tw.rootWidget.addEventListener(\"tm-browser-refresh\",function(event) {\n\t\t\twindow.location.reload(true);\n                        if(!!window.twi && !!window.twi.reload) window.twi.reload() ;\n\t\t});\n\n</script>"
+    }
+]

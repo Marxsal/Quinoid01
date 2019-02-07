@@ -69,6 +69,10 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+Intent intent = getIntent() ;
+if(intent.hasExtra("exit")) finish();
+
         setContentView(R.layout.activity_main);
 
         //TwManager.get(this).loadTwFilesFromPreferences();
@@ -86,6 +90,12 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
         // Create a message handling object as an anonymous class.
         AdapterView.OnItemClickListener mMessageClickedHandler = new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView parent, View v, int position, long id) {
+
+                if(TwManager.get(TwActivity.this).getBrowsableFiles().size()<1) {
+                    makeToast("There are no files marked for browsing.");
+                    return;
+                }
+
                 if(TwManager.get(TwActivity.this).anyFileBased()) {
                     if (ContextCompat.checkSelfPermission(TwActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                             != PackageManager.PERMISSION_GRANTED) {
@@ -105,7 +115,7 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
         };
        listView.setOnItemClickListener(mMessageClickedHandler);
 
-        //TODO: 00 Make dialog menu on long press
+        //DONE: 00 Make dialog menu on long press
         // Handle long presses
         AdapterView.OnItemLongClickListener mItemLongClickListener = new AdapterView.OnItemLongClickListener() {
             @Override
@@ -125,6 +135,15 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 REQUEST_WRITE_EXTERNAL_STORAGE);
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, TwActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("exit", true);
+        startActivity(intent);
+        //super.onBackPressed();
     }
 
     @Override

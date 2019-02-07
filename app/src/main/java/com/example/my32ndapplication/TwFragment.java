@@ -134,8 +134,9 @@ public class TwFragment extends Fragment {
                 + twFile.getId() + " which has absolute path " + twFile.getUnschemedFilePath());
 
         webView = v.findViewById(R.id.webview) ;
-        webView.addJavascriptInterface(new WebAppInterface(getActivity(),twFile),"twi");
+        webView.addJavascriptInterface(new WebAppInterface(getActivity(),twFile,webView),"twi" );
         WebSettings webSettings = webView.getSettings() ;
+
 
         webSettings.setJavaScriptEnabled(true);
         webSettings.setAllowFileAccess(true);
