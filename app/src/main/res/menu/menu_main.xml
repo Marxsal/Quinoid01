@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.android.mytemplateapplication.MainActivity">
+    <item
+        android:id="@+id/launch_sys_explorer"
+        android:orderInCategory="100"
+        android:title="@string/add_explorer_file"
+        android:icon="@android:drawable/ic_menu_add"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/launch_local_explorer"
+        android:orderInCategory="150"
+        android:title="@string/add_local_file"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/download_empty"
+        android:orderInCategory="160"
+        android:title="Download test"
+        app:showAsAction="never" />
+
+</menu>

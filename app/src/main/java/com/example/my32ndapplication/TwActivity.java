@@ -1,6 +1,8 @@
 package com.example.my32ndapplication;
 
 import android.Manifest;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +23,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
@@ -48,6 +52,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,33 +63,40 @@ import java.util.Set;
 public class TwActivity extends AppCompatActivity implements TwDialogFragment.TwDialogFragmentListener {
     public static final String LOG_TAG = "32XND-TwActivity";
     public static final String DIALOG_TAG = "FirstDialogTag";
-    public static final String LAUNCH_PAGE = "PagerView Launch Page Position" ;
+    public static final String LAUNCH_PAGE = "PagerView Launch Page Position";
     public static final String EXTRA_MESSAGE = "com.example.my32ndapplication.MESSAGE";
     public static final String AUTHORITY = "com.example.my32ndapplication.provider"; // Needed by FileUtils2 and file provider
 
-    public static final int REQUEST_WRITE_EXTERNAL_STORAGE =  42 ;
-    final int REQUEST_FILE_OPEN = 2 ;
-    final int NNF_FILEPICKER = 3 ;
-    private ArrayList<TwFile> mTwFiles ;
+    public static TwUtils sTwUtils ;
+    public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 42;
+    final int REQUEST_FILE_OPEN = 2;
+    final int NNF_FILEPICKER = 3;
+    private long downloadReference ;
+
+    private ArrayList<TwFile> mTwFiles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-Intent intent = getIntent() ;
-if(intent.hasExtra("exit")) finish();
+        // Code to shutdown app completely -- using "finish" inside of back-button code was unsuccessfull
+        // ... or maybe it was fine. Hard to tell
+        Intent intent = getIntent();
+        if (intent.hasExtra("exit")) finish();
+
+        sTwUtils = TwUtils.get(this);
 
         setContentView(R.layout.activity_main);
 
         //TwManager.get(this).loadTwFilesFromPreferences();
 
-        mTwFiles = TwManager.get(this).getTwFiles() ;
+        mTwFiles = TwManager.get(this).getTwFiles();
 
-        ListView listView = findViewById(R.id.listview) ;
+        ListView listView = findViewById(R.id.listview);
 //        ArrayAdapter<TwFile> adapter =
 //                new ArrayAdapter<TwFile>(this, android.R.layout.simple_list_item_1, mTwFiles);
         TwFileAdapter adapter =
-                new TwFileAdapter(mTwFiles) ;
+                new TwFileAdapter(mTwFiles);
 
         listView.setAdapter(adapter);
 
@@ -91,12 +104,12 @@ if(intent.hasExtra("exit")) finish();
         AdapterView.OnItemClickListener mMessageClickedHandler = new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView parent, View v, int position, long id) {
 
-                if(TwManager.get(TwActivity.this).getBrowsableFiles().size()<1) {
-                    makeToast("There are no files marked for browsing.");
+                if (TwManager.get(TwActivity.this).getBrowsableFiles().size() < 1) {
+                    sTwUtils.makeToast("There are no files marked for browsing.");
                     return;
                 }
 
-                if(TwManager.get(TwActivity.this).anyFileBased()) {
+                if (TwManager.get(TwActivity.this).anyFileBased()) {
                     if (ContextCompat.checkSelfPermission(TwActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                             != PackageManager.PERMISSION_GRANTED) {
                         Log.d(LOG_TAG, "onItemClickListener thinks there are file-type items and NO PERMISSION GRANTED.");
@@ -104,16 +117,16 @@ if(intent.hasExtra("exit")) finish();
                 }
                 Log.d(LOG_TAG, "onItemClickListener - about to request permissions.");
 
-                    TwFile twFile = mTwFiles.get(0);
-                    Intent intent = new Intent(TwActivity.this, TwPagerActivity.class);
-                    //intent.putExtra(TwFragment.TW_FILE_NAME, twFile.getTitle());
-                    intent.putExtra(LAUNCH_PAGE, position);
-                    startActivity(intent);
-                    // Do something in response to the click
+                TwFile twFile = mTwFiles.get(0);
+                Intent intent = new Intent(TwActivity.this, TwPagerActivity.class);
+                //intent.putExtra(TwFragment.TW_FILE_NAME, twFile.getTitle());
+                intent.putExtra(LAUNCH_PAGE, position);
+                startActivity(intent);
+                // Do something in response to the click
 
             }
         };
-       listView.setOnItemClickListener(mMessageClickedHandler);
+        listView.setOnItemClickListener(mMessageClickedHandler);
 
         //DONE: 00 Make dialog menu on long press
         // Handle long presses
@@ -125,17 +138,90 @@ if(intent.hasExtra("exit")) finish();
 
                 TwDialogFragment dialogFragment = TwDialogFragment.newInstance(i);
                 dialogFragment.show(getSupportFragmentManager(), DIALOG_TAG);
-                ListView listView = findViewById(R.id.listview) ;
+                ListView listView = findViewById(R.id.listview);
                 ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
                 return true;
             }
-        } ;
-       listView.setOnItemLongClickListener(mItemLongClickListener);
+        };
+        listView.setOnItemLongClickListener(mItemLongClickListener);
 
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 REQUEST_WRITE_EXTERNAL_STORAGE);
 
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.launch_sys_explorer:
+                launchSystemExplorer();
+                return true;
+            case R.id.launch_local_explorer :
+                launchLocalExplorer();
+                return true ;
+            case R.id.download_empty :
+
+                //downloadTW();
+                Log.d(LOG_TAG, "onOptions... download empty");
+                if (!TwUtils.isConnected(this)) {
+                    sTwUtils.makeToast("No internet connected.");
+                    return true;
+                }
+                downloadReference = DownloadData(Uri.parse("https://tiddlywiki.com/empty"));
+
+                return true ;
+            default:
+
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private  long DownloadData (Uri uri) {
+
+        long downloadReference;
+
+        if (! sTwUtils.isExternalStorageWritable()) {
+            sTwUtils.makeToast("This operation requires external storage.");
+            return 0 ;
+        } else {
+            Log.d(LOG_TAG, "Apparently I think there is external storage.");
+        }
+
+        // Create request for android download manager
+        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        DownloadManager.Request request = new DownloadManager.Request(uri);
+
+        //Setting title of request
+        request.setTitle("Data Download");
+
+        //Setting description of request
+        request.setDescription("Android Data download using DownloadManager.");
+
+        //Set the local destination for the downloaded file to a path within the application's external files directory
+//        if (v.getId() == R.id.DownloadMusic)
+//            request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, "AndroidTutorialPoint.mp3");
+//        else if (v.getId() == R.id.DownloadImage)
+//            request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, "AndroidTutorialPoint.jpg");
+
+        //request.setDestinationInExternalFilesDir(TwActivity.this, Environment.DIRECTORY_DOWNLOADS, "TW-test.html");
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "TW-test.html");
+        //Enqueue download and save into referenceId
+        downloadReference = downloadManager.enqueue(request);
+
+//        Button DownloadStatus = (Button) findViewById(R.id.DoSwnloadStatus);
+//        DownloadStatus.setEnabled(true);
+//        Button CancelDownload = (Button) findViewById(R.id.CancelDownload);
+//        CancelDownload.setEnabled(true);
+
+        return downloadReference;
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -166,8 +252,8 @@ if(intent.hasExtra("exit")) finish();
         super.onStart();
     }
 
-    public void selectFile(View view) {
-        //TODO: Change to selectLocalFile
+    public void launchLocalExplorer() {
+        //DONE: Change method name
         // TODO: Need to update NNF library to filter out non-HTML files
         Intent i = new Intent(this, FilePickerActivity.class);
         // This works if you defined the intent filter
@@ -186,10 +272,13 @@ if(intent.hasExtra("exit")) finish();
 
         startActivityForResult(i, NNF_FILEPICKER);
 
-
     }
 
-        @Override
+    public void launchLocalExplorer(View view) {
+        launchLocalExplorer();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // This code may be obsolete if the file-picker approach works.
@@ -200,45 +289,41 @@ if(intent.hasExtra("exit")) finish();
 
             // Indicate we really want to keep these documents
             final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            getContentResolver().takePersistableUriPermission(uriFile,takeFlags);
+            getContentResolver().takePersistableUriPermission(uriFile, takeFlags);
 
             //TwManager.get(this).addTwFile(new TwFile(uriFile.getLastPathSegment()));
-            TwManager.get(this).addTwFile(new TwFile(this,uriFile.toString()));
+            TwManager.get(this).addTwFile(new TwFile(this, uriFile.toString()));
 
             // Launch something 2019-01-10 We will need this code in the
             // listview listener, maybe
-            ListView listView = findViewById(R.id.listview) ;
+            ListView listView = findViewById(R.id.listview);
             ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
 
         }
 
-            if (requestCode == NNF_FILEPICKER && resultCode == RESULT_OK) {
-                // Use the provided utility method to parse the result
-                List<Uri> uriFiles = Utils.getSelectedFilesFromResult(data);
-                for (Uri uriFile : uriFiles) {
-                    //File file = Utils.getFileForUri(uriFile);
-                    String path = uriFile.getPath() ;
-                    int rootpos = path.indexOf("/root/") ;
-                    if( rootpos != -1 ) {
-                        path = path.substring(6);
-                    }
-                    //path = "file:///" + path ;
-                    TwManager.get(this).addTwFile(new TwFile(this,path));
-                    // Launch something 2019-01-10 We will need this code in the
-                    // listview listener, maybe
-                    ListView listView = findViewById(R.id.listview);
-                    ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
+        if (requestCode == NNF_FILEPICKER && resultCode == RESULT_OK) {
+            // Use the provided utility method to parse the result
+            List<Uri> uriFiles = Utils.getSelectedFilesFromResult(data);
+            for (Uri uriFile : uriFiles) {
+                //File file = Utils.getFileForUri(uriFile);
+                String path = uriFile.getPath();
+                int rootpos = path.indexOf("/root/");
+                if (rootpos != -1) {
+                    path = path.substring(6);
                 }
+                //path = "file:///" + path ;
+                TwManager.get(this).addTwFile(new TwFile(this, path));
+                // Launch something 2019-01-10 We will need this code in the
+                // listview listener, maybe
+                ListView listView = findViewById(R.id.listview);
+                ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
             }
+        }
 
 
     }
 
 
-
-    public void makeToast(String tm) {
-        Toast.makeText(this, tm, Toast.LENGTH_SHORT).show();
-    }
 
     @Override
     protected void onPause() {
@@ -249,11 +334,17 @@ if(intent.hasExtra("exit")) finish();
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(LOG_TAG, "onDestroy");
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         TwManager.get(this).saveTwFilesToJSON();
         Log.d(LOG_TAG, "onResume - saving to JSON complete.");
-        ListView listView = findViewById(R.id.listview) ;
+        ListView listView = findViewById(R.id.listview);
         ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
     }
 
@@ -265,32 +356,34 @@ if(intent.hasExtra("exit")) finish();
             Log.d(LOG_TAG, "Directory not created");
         }
 
-        return file.getPath() ;
+        return file.getPath();
     }
 
 
-
-
-
-    public void sendLaunchMessage(View view) { //TODO: Change name to selectExplorerFile
-
+    public void launchSystemExplorer() { //DONE: Change name
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         //intent.setType("file/*");
-intent.setType("text/*") ;
+        intent.setType("text/*");
         //intent.setType("text/html,text/htm,text.txt,html/tw");
         //intent.setType("*/*");
-//        String[] mimetypes = {"text/html", "text/htm", "html/tw"};
-//        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-//
+        // String[] mimetypes = {"text/html", "text/htm", "html/tw"};
+        // intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         // Only the system receives the ACTION_OPEN_DOCUMENT, so no need to test.
         startActivityForResult(intent, REQUEST_FILE_OPEN);
-        //selectFile();
+        //launchLocalExplorer();
 
        /* TwFile twFile =  mTwFiles.get(0) ;
         Intent intent = new Intent(TwActivity.this, TwPagerActivity.class) ;
         intent.putExtra(TwFragment.TW_FILE_NAME, twFile.getTitle());
         startActivity(intent);*/
+    }
+
+    // This version needed for easy button mapping with layout resource
+    public void launchSystemExplorer(View view) { //DONE: Change name
+
+        launchSystemExplorer();
     }
 
     @Override
@@ -309,6 +402,8 @@ intent.setType("text/*") ;
         ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
     }
 
+
+
     private class TwFileAdapter extends ArrayAdapter<TwFile> {
 
         public TwFileAdapter(ArrayList<TwFile> twFiles) {
@@ -316,23 +411,45 @@ intent.setType("text/*") ;
         }
 
         @Override
-        public View getView(int position,  View convertView,  ViewGroup parent) {
+        public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = getLayoutInflater().inflate(R.layout.list_item, null);
             }
             TwFile twFile = mTwFiles.get(position);
-            TextView titleView = (TextView) convertView.findViewById(R.id.itemtitle) ;
+            TextView titleView = (TextView) convertView.findViewById(R.id.itemtitle);
             titleView.setText(twFile.toString());
             CheckBox checkBoxBrowse = (CheckBox) convertView.findViewById(R.id.checkboxBrowse);
             checkBoxBrowse.setChecked(twFile.isBrowsable());
-            if(twFile.getIconPath() != null && !twFile.getIconPath().isEmpty()) {
-               ImageView imageView = (ImageView) convertView.findViewById(R.id.iconView);
-               Bitmap bitmap = BitmapFactory.decodeFile(twFile.getIconPath()) ;
-               imageView.setImageBitmap(bitmap);
+            if (twFile.getIconPath() != null && !twFile.getIconPath().isEmpty()) {
+                ImageView imageView = (ImageView) convertView.findViewById(R.id.iconView);
+                Bitmap bitmap = BitmapFactory.decodeFile(twFile.getIconPath());
+                imageView.setImageBitmap(bitmap);
             }
             return convertView;
         }
     }
+
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+
+        public void onReceive(Context ctxt, Intent intent) {
+
+
+            long referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+
+
+            Log.d(LOG_TAG, "Broadcast received:" + referenceId);
+
+            //list.remove(referenceId);
+
+
+//            if (list.isEmpty())
+//            {
+//
+//            }
+
+        }
+    };
 
 }
 

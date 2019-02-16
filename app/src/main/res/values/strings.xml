@@ -9,5 +9,7 @@
     <string name="dialog_label_display_title">Use this title for display:</string>
     <string name="dialog_confirm_button">Confirm</string>
     <string name="dialog_cancel_button">Cancel</string>
+    <string name="add_explorer_file">System Picker</string>
+    <string name="add_local_file">Local Picker (depr)</string>
 
 </resources>
