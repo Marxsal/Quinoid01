@@ -3,17 +3,14 @@ package com.example.my32ndapplication;
 import android.Manifest;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -21,44 +18,27 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.EditText;
 //import android.widget.ListView;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.nononsenseapps.filepicker.FilePickerActivity;
 import com.nononsenseapps.filepicker.Utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public class TwActivity extends AppCompatActivity implements TwDialogFragment.TwDialogFragmentListener {
     public static final String LOG_TAG = "32XND-TwActivity";
@@ -66,7 +46,7 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
     public static final String LAUNCH_PAGE = "PagerView Launch Page Position";
     public static final String EXTRA_MESSAGE = "com.example.my32ndapplication.MESSAGE";
     public static final String AUTHORITY = "com.example.my32ndapplication.provider"; // Needed by FileUtils2 and file provider
-
+public static final long REFERENCE_UNAVAILABLE = -1 ;
     public static TwUtils sTwUtils ;
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 42;
     final int REQUEST_FILE_OPEN = 2;
@@ -74,7 +54,7 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
     private long downloadReference ;
 
     private ArrayList<TwFile> mTwFiles;
-
+    private Map<Long, TwFile> mTwDownloads = new HashMap<Long, TwFile>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +67,8 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
         sTwUtils = TwUtils.get(this);
 
         setContentView(R.layout.activity_main);
+
+        registerReceiver(broadcastReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         //TwManager.get(this).loadTwFilesFromPreferences();
 
@@ -173,7 +155,8 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
                     sTwUtils.makeToast("No internet connected.");
                     return true;
                 }
-                downloadReference = DownloadData(Uri.parse("https://tiddlywiki.com/empty"));
+                downloadReference = DownloadTw("https://tiddlywiki.com/empty","empty", "Basic - empty TW") ;
+
 
                 return true ;
             default:
@@ -182,10 +165,13 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
         }
     }
 
-    private  long DownloadData (Uri uri) {
+    private  long DownloadTw(String pUrl,String pFileStem, String pDescription) {
+
+        Uri uri = Uri.parse(pUrl);
 
         long downloadReference;
 
+        // TODO: Make isExternalStorageWritable part of the getTWExternalStoragePublicDirPathname logic
         if (! sTwUtils.isExternalStorageWritable()) {
             sTwUtils.makeToast("This operation requires external storage.");
             return 0 ;
@@ -193,15 +179,25 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
             Log.d(LOG_TAG, "Apparently I think there is external storage.");
         }
 
+
+        String twFilePath = sTwUtils.getTWExternalStoragePublicDirPathname() ;
+        if ( twFilePath == null ) {
+            sTwUtils.makeToast("Not able to obtain external public storage.");
+            return REFERENCE_UNAVAILABLE ;
+        }
+
+        twFilePath = twFilePath + "/" + sTwUtils.makeRandomizedFileName(pFileStem, ".html");
+
+
         // Create request for android download manager
         DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(uri);
 
         //Setting title of request
-        request.setTitle("Data Download");
+        request.setTitle("Download file: " + pFileStem );
 
         //Setting description of request
-        request.setDescription("Android Data download using DownloadManager.");
+        request.setDescription("Download: " + pDescription);
 
         //Set the local destination for the downloaded file to a path within the application's external files directory
 //        if (v.getId() == R.id.DownloadMusic)
@@ -210,9 +206,21 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
 //            request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, "AndroidTutorialPoint.jpg");
 
         //request.setDestinationInExternalFilesDir(TwActivity.this, Environment.DIRECTORY_DOWNLOADS, "TW-test.html");
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "TW-test.html");
+        //File file = new File(TwUtils.get(this).getTWExternalStoragePublicDirPathname(), "TW-test.html");
+        File file = new File(twFilePath);
+        //request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "TW-test.html");
+        Log.d(LOG_TAG, "I think requesting this file path: " + file.getPath());
+        Log.d(LOG_TAG, "I think requesting this file : " + file.getName() );
+
+
+        request.setDestinationUri(Uri.fromFile(file));
         //Enqueue download and save into referenceId
         downloadReference = downloadManager.enqueue(request);
+
+        TwFile twFile = new TwFile(this, file.getPath());
+        twFile.setTitle(pDescription);
+        mTwDownloads.put(downloadReference, twFile);
+
 
 //        Button DownloadStatus = (Button) findViewById(R.id.DoSwnloadStatus);
 //        DownloadStatus.setEnabled(true);
@@ -336,6 +344,7 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
         Log.d(LOG_TAG, "onDestroy");
     }
 
@@ -440,6 +449,15 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
 
             Log.d(LOG_TAG, "Broadcast received:" + referenceId);
 
+            TwFile twFile = mTwDownloads.get(new Long(referenceId));
+            if(twFile != null ) {
+                Log.d(LOG_TAG, "broadcastReceiver - Adding twfile to list");
+                TwManager.get(TwActivity.this).addTwFile(twFile);
+                ListView listView = findViewById(R.id.listview);
+                ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
+                mTwDownloads.remove(new Long(referenceId))  ;
+
+            }
             //list.remove(referenceId);
 
 
