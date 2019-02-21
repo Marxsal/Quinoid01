@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -47,6 +49,7 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
     public static final String EXTRA_MESSAGE = "com.example.my32ndapplication.MESSAGE";
     public static final String AUTHORITY = "com.example.my32ndapplication.provider"; // Needed by FileUtils2 and file provider
 public static final long REFERENCE_UNAVAILABLE = -1 ;
+    public static final String TW_SUBDIR = "TwFiles";
     public static TwUtils sTwUtils ;
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 42;
     final int REQUEST_FILE_OPEN = 2;
@@ -63,6 +66,30 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
         // ... or maybe it was fine. Hard to tell
         Intent intent = getIntent();
         if (intent.hasExtra("exit")) finish();
+
+        // Get action and MIME type
+        String intentAction = intent.getAction();
+        String intentType = intent.getType();
+
+        if (Intent.ACTION_SEND.equals(intentAction) && intentType != null) {
+            if ("text/plain".equals(intentType)) {
+//                handleSendText(intent); // Handle text being sent
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                if(sharedText != null) {
+                    WebView tempWebView = new WebView();
+                    Log.d(LOG_TAG, "I see incoming intent: " + sharedText);
+                }
+               finish();
+
+            }
+        }
+
+        //        Uri intentData = intent.getData() ;
+//        if(intent.getType() != null && intent.getType().equals("text/plain")) {
+//
+//            Log.d(LOG_TAG, "I see incoming intent !!");
+//            finish();
+//        }
 
         sTwUtils = TwUtils.get(this);
 
@@ -135,6 +162,7 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuCompat.setGroupDividerEnabled(menu,true);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -155,38 +183,57 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
                     sTwUtils.makeToast("No internet connected.");
                     return true;
                 }
-                downloadReference = DownloadTw("https://tiddlywiki.com/empty","empty", "Basic - empty TW") ;
 
+//                String twFilePath = sTwUtils.getTWInternalStoragePathname("internals") ;
+//                if ( twFilePath == null ) {
+//                    sTwUtils.makeToast("Not able to obtain storage.");
+//                    return true;
+//                }
+
+                String fileName = sTwUtils.makeRandomizedFileName("empty", ".html");
+                File dirPath = sTwUtils.getTWDocumentPath(TW_SUBDIR);
+                downloadReference = DownloadTw("https://tiddlywiki.com/empty", dirPath, fileName ,"Basic - empty TW") ;
 
                 return true ;
+
+            case R.id.menu_exit :
+
+                Intent intent = new Intent(this, TwActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("exit", true);
+                startActivity(intent);
+
+            // TODO: Menu Exit option (TW-DOWNLOADS) #DONE
+
             default:
 
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private  long DownloadTw(String pUrl,String pFileStem, String pDescription) {
+    private  long DownloadTw(String pUrl,File pFilePath, String pFileName ,String pDescription) {
 
         Uri uri = Uri.parse(pUrl);
 
         long downloadReference;
 
-        // TODO: Make isExternalStorageWritable part of the getTWExternalStoragePublicDirPathname logic
-        if (! sTwUtils.isExternalStorageWritable()) {
-            sTwUtils.makeToast("This operation requires external storage.");
-            return 0 ;
-        } else {
-            Log.d(LOG_TAG, "Apparently I think there is external storage.");
-        }
+        // Downloading to internal instead.
+//        // Make isExternalStorageWritable part of the getTWExternalStoragePublicDirPathname logic
+//        if (! sTwUtils.isExternalStorageWritable()) {
+//            sTwUtils.makeToast("This operation requires external storage.");
+//            return 0 ;
+//        } else {
+//            Log.d(LOG_TAG, "Apparently I think there is external storage.");
+//        }
 
 
-        String twFilePath = sTwUtils.getTWExternalStoragePublicDirPathname() ;
-        if ( twFilePath == null ) {
-            sTwUtils.makeToast("Not able to obtain external public storage.");
-            return REFERENCE_UNAVAILABLE ;
-        }
-
-        twFilePath = twFilePath + "/" + sTwUtils.makeRandomizedFileName(pFileStem, ".html");
+//        String twFilePath = sTwUtils.getTWExternalStoragePublicDirPathname() ;
+//        if ( twFilePath == null ) {
+//            sTwUtils.makeToast("Not able to obtain external public storage.");
+//            return REFERENCE_UNAVAILABLE ;
+//        }
+//
+//        twFilePath = twFilePath + "/" + sTwUtils.makeRandomizedFileName(pFileStem, ".html");
 
 
         // Create request for android download manager
@@ -194,7 +241,7 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
         DownloadManager.Request request = new DownloadManager.Request(uri);
 
         //Setting title of request
-        request.setTitle("Download file: " + pFileStem );
+        request.setTitle("Download file"  );
 
         //Setting description of request
         request.setDescription("Download: " + pDescription);
@@ -207,7 +254,7 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
 
         //request.setDestinationInExternalFilesDir(TwActivity.this, Environment.DIRECTORY_DOWNLOADS, "TW-test.html");
         //File file = new File(TwUtils.get(this).getTWExternalStoragePublicDirPathname(), "TW-test.html");
-        File file = new File(twFilePath);
+        File file = new File(pFilePath,pFileName);
         //request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "TW-test.html");
         Log.d(LOG_TAG, "I think requesting this file path: " + file.getPath());
         Log.d(LOG_TAG, "I think requesting this file : " + file.getName() );
@@ -231,14 +278,15 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
     }
 
 
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(this, TwActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("exit", true);
-        startActivity(intent);
-        //super.onBackPressed();
-    }
+    // TODO: Move code from onBackPressed to exit option (TW-DOWNLOADS #CURRENT)
+//    @Override
+//    public void onBackPressed() {
+//        Intent intent = new Intent(this, TwActivity.class);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        intent.putExtra("exit", true);
+//        startActivity(intent);
+//        //super.onBackPressed();
+//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -453,6 +501,7 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
             if(twFile != null ) {
                 Log.d(LOG_TAG, "broadcastReceiver - Adding twfile to list");
                 TwManager.get(TwActivity.this).addTwFile(twFile);
+                TwManager.get(TwActivity.this).saveTwFilesToJSON() ;
                 ListView listView = findViewById(R.id.listview);
                 ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
                 mTwDownloads.remove(new Long(referenceId))  ;

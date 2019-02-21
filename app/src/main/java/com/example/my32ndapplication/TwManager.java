@@ -20,34 +20,34 @@ public class TwManager {
     private TwJSONSerializer mSerializer ;
 
 
-    public void loadTwFilesFromPreferences() {
+//    public void loadTwFilesFromPreferences() {
+//
+//
+//        mTwFiles.clear();
+//        Set<String> stringDefaults = new HashSet<String>();
+//        // See if there is a set of TW files to import
+//        Set<String> stringSet = PreferenceManager.getDefaultSharedPreferences(mAppContext)
+//                .getStringSet(mAppContext.getString(R.string.preferences_string), stringDefaults);
+//        int cnt = 0;
+//        for (String s : stringSet) {
+//            mTwFiles.add(new TwFile(mAppContext, s));
+//            cnt++;
+//        }
+//        //Log.d(LOG_TAG, "I loaded " + cnt + " files.");
+//    }
 
 
-        mTwFiles.clear();
-        Set<String> stringDefaults = new HashSet<String>();
-        // See if there is a set of TW files to import
-        Set<String> stringSet = PreferenceManager.getDefaultSharedPreferences(mAppContext)
-                .getStringSet(mAppContext.getString(R.string.preferences_string), stringDefaults);
-        int cnt = 0;
-        for (String s : stringSet) {
-            mTwFiles.add(new TwFile(mAppContext, s));
-            cnt++;
-        }
-        //Log.d(LOG_TAG, "I loaded " + cnt + " files.");
-    }
 
-
-
-    public void saveTwFilesToPreferences() {
-
-        Set<String> stringSet = new HashSet<String>();
-        for (TwFile s : mTwFiles) {
-            stringSet.add(s.getId());
-        }
-        // See if there is a set of TW files to import
-        PreferenceManager.getDefaultSharedPreferences(mAppContext).edit().putStringSet(mAppContext.getString(R.string.preferences_string), stringSet).commit();
-
-    }
+//    public void saveTwFilesToPreferences() {
+//
+//        Set<String> stringSet = new HashSet<String>();
+//        for (TwFile s : mTwFiles) {
+//            stringSet.add(s.getId());
+//        }
+//        // See if there is a set of TW files to import
+//        PreferenceManager.getDefaultSharedPreferences(mAppContext).edit().putStringSet(mAppContext.getString(R.string.preferences_string), stringSet).commit();
+//
+//    }
 
     public boolean saveTwFilesToJSON() {
         try {
@@ -74,6 +74,10 @@ public class TwManager {
             mTwFiles = new ArrayList<TwFile>();
             Log.d(LOG_TAG, "ERR loading TwFiles", e);
         }
+
+        // Check if there are any new files in public dire
+        addFromDocumentDir(app);
+
         //mDirIsClean = false ;
         /*
         for (int i = 0; i < 100; i++) {
@@ -156,6 +160,39 @@ public class TwManager {
             if (reallyTempFile.isFile()) reallyTempFile.delete();
         }
     }
+
+    private void addFromDocumentDir(Context cntx) {
+        File tempFile = TwUtils.get(cntx).getTWDocumentPath(TwActivity.TW_SUBDIR) ;
+        Log.d(LOG_TAG, "Checking directory: " + tempFile.getAbsolutePath());
+        //File tempFile = cntx.getDir("provided", Context.MODE_PRIVATE).getAbsoluteFile();
+        ArrayList<String>  arrayList = new ArrayList<String>();
+
+        //ArrayList<TwFile> lTwFiles = TwManager.get(cntx).getTwFiles() ;
+        for (TwFile tf : mTwFiles) {
+            arrayList.add(tf.getUnschemedFilePath()) ;
+//            Log.d(LOG_TAG,"addFromDocumentDir: I see saved file " + tf.getUnschemedFilePath()) ;
+//            if(arrayList.contains(tf.getUnschemedFilePath()))
+//                Log.d(LOG_TAG, "I think it has been added: " + tf.getUnschemedFilePath());
+        }
+
+        for (File realFile : tempFile.listFiles()) {
+                if(arrayList.contains(realFile.getAbsoluteFile().toString()))
+                    Log.d(LOG_TAG, "addFromdocumentDir: I HAVE FOUND:" + realFile.getAbsoluteFile() + "XXX");
+                else
+
+                {
+                    Log.d(LOG_TAG, "addFromdocumentDir: NOT -- FOUND:" + realFile.getAbsoluteFile() + "XXX");
+                    TwFile twFile = new TwFile(cntx, realFile.getAbsoluteFile().toString());
+                    addTwFile(twFile);
+                }
+                //  Log.d(LOG_TAG, "About to check for file " + reallyTempFile.getName());
+                //if (reallyTempFile.isFile()) reallyTempFile.delete();
+
+        }
+
+    }
+
+
 
     public boolean anyFileBased() {
         int cnt = 0;

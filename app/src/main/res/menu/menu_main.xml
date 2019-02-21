@@ -2,6 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.android.mytemplateapplication.MainActivity">
+    <group android:id="@+id/grp_menu_general">
     <item
         android:id="@+id/launch_sys_explorer"
         android:orderInCategory="100"
@@ -20,4 +21,12 @@
         android:title="Download test"
         app:showAsAction="never" />
 
+    </group>
+    <group android:id="@+id/grp_final">
+    <item
+        android:id="@+id/menu_exit"
+        android:orderInCategory="170"
+        android:title="@string/menu_exit"
+        app:showAsAction="never" />
+    </group>
 </menu>

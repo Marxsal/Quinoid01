@@ -11,5 +11,6 @@
     <string name="dialog_cancel_button">Cancel</string>
     <string name="add_explorer_file">System Picker</string>
     <string name="add_local_file">Local Picker (depr)</string>
+    <string name="menu_exit">Exit</string>
 
 </resources>

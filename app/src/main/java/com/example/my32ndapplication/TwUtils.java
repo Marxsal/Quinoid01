@@ -48,6 +48,28 @@ public class TwUtils {
 
     }
 
+
+    public File getTWDocumentPath(String subdir) {
+        File file ;
+        //try {
+            file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),subdir);
+
+            //File filePath = new File(pathStr+"/"+subdir+"/") ;
+            //filePath.mkdirs() ;
+            //pathStr = filePath.getPath() ;
+            if (!file.mkdirs()) {
+                Log.d(LOG_TAG, "Directory for " + subdir + " not created.");
+            }
+            Log.d(LOG_TAG, "Returning path: " + file.getAbsolutePath());
+        //} catch (IOException e) {
+        //    return null ;
+        //}
+        // User needs to check if null
+        return file ;
+    }
+
+
+
     public String makeRandomizedFileName(String filename, String suffix) {
         String formattedDate = new SimpleDateFormat("yyyyMMdd-HH-mm-ss").format(new Date());
         return filename + "-" + formattedDate + suffix ;
