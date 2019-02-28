@@ -35,6 +35,16 @@ public class TwFile {
     private boolean mIsContentType;     //    private Context context;
     private boolean mIsBrowsable ; // Will we be loading a page for this item?
     private String mIconPath = "" ;
+    private String mMessage = ""  ; // Message/clip to be added to file once opened
+
+
+    public String getMessage() {
+        return mMessage;
+    }
+
+    public void setMessage(String mMessage) {
+        this.mMessage = mMessage;
+    }
 
     // This is the path to the physical file that we are using in WebView
     // but without the file:/// part because we need that to create streams

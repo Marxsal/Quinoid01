@@ -21,6 +21,7 @@ public class  WebAppInterface {
     @JavascriptInterface
     public void saveFile(String pathname, String text) {
         //Toast.makeText(mContext,pathname,Toast.LENGTH_SHORT).show();
+        Log.d(LOG_TAG, "saveFile - being called");
         mTwFile.saveFile(text,mContext);
       /*  try {
             //Log.e(LOG_TAG, dir + "/" + filename);

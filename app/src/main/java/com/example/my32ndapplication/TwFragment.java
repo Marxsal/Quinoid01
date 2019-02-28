@@ -32,6 +32,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -158,6 +160,12 @@ public class TwFragment extends Fragment {
                 //twFile.setTitle(useme);
             }
         } ;
+        final MyAction nullSetter = new MyAction() {
+            @Override
+            void doSomethingWithValue(String useme) {
+                Log.d(LOG_TAG, "Inside myaction nullSetter, seeing message " + useme);
+            }
+        } ;
 
 
 
@@ -186,6 +194,19 @@ public class TwFragment extends Fragment {
                 //Log.d(LOG_TAG, "EXP1: Seeing title: " + view.getTitle());
                 //String title = loadJavascript ("$tw.wiki.getTiddlerText('$:/SiteTitle')",titleSetter);
                 String icoText = loadJavascript ("$tw.wiki.getTiddlerText('$:/favicon.ico')",iconSetter);
+                String message = twFile.getMessage() ;
+                if(message != null && !message.isEmpty()) {
+                    message = JSONObject.quote(message);
+                    String command =
+                            "console.log('COMMAND 1');" +
+                                    "var draftTiddler = new $tw.Tiddler( " +
+                                    "{ title: \"CLIPBOARD\",   text: " + message + "}, " +
+                                    "$tw.wiki.getModificationFields()); " +
+                                    "$tw.wiki.addTiddler(draftTiddler);";
+                    Log.d(LOG_TAG, "Javascript - about to create tiddler with message: " + message);
+                    loadJavascript(command, nullSetter);
+                }
+
 //twFile.makeIconAndPath(getActivity(),icoText);
                   //view.getFavicon()
                 //twFile.saveIconPath(getActivity(),view.getFavicon());

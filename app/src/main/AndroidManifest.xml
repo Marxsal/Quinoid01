@@ -55,7 +55,10 @@
             android:name=".TwPagerActivity"
 android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="orientation|screenSize"
-            ></activity>
+            >
+
+
+        </activity>
 
         <activity
             android:name="com.nononsenseapps.filepicker.FilePickerActivity"

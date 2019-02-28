@@ -24,7 +24,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.ValueCallback;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -67,31 +70,31 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
         Intent intent = getIntent();
         if (intent.hasExtra("exit")) finish();
 
+        sTwUtils = TwUtils.get(this);
+
+        mTwFiles = TwManager.get(this).getTwFiles();
+
         // Get action and MIME type
         String intentAction = intent.getAction();
         String intentType = intent.getType();
-
+        //        Uri intentData = intent.getData() ;
         if (Intent.ACTION_SEND.equals(intentAction) && intentType != null) {
-            if ("text/plain".equals(intentType)) {
-//                handleSendText(intent); // Handle text being sent
-                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-                if(sharedText != null) {
-                    WebView tempWebView = new WebView();
-                    Log.d(LOG_TAG, "I see incoming intent: " + sharedText);
-                }
-               finish();
 
+            if (intent.getType() != null && intent.getType().equals("text/plain")) {
+
+                Log.d(LOG_TAG, "I see incoming intent !!");
+
+                // TODO: TW-DOWNLOADS change file fetched from hard-coded to user-selected
+                TwFile twFile = mTwFiles.get(1);
+
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                String message = twFile.getMessage() + "----" + sharedText;
+
+                Log.d(LOG_TAG, "Setting up return message: " + message);
+                twFile.setMessage(message);
+                finish();
             }
         }
-
-        //        Uri intentData = intent.getData() ;
-//        if(intent.getType() != null && intent.getType().equals("text/plain")) {
-//
-//            Log.d(LOG_TAG, "I see incoming intent !!");
-//            finish();
-//        }
-
-        sTwUtils = TwUtils.get(this);
 
         setContentView(R.layout.activity_main);
 
@@ -99,7 +102,9 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
 
         //TwManager.get(this).loadTwFilesFromPreferences();
 
-        mTwFiles = TwManager.get(this).getTwFiles();
+
+
+
 
         ListView listView = findViewById(R.id.listview);
 //        ArrayAdapter<TwFile> adapter =
