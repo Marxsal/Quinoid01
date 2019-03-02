@@ -141,6 +141,29 @@ public class TwManager {
         //saveCrimes();
     }
 
+    public void setAsClipboard(TwFile c) {
+        for (TwFile x : mTwFiles) {
+            if (x.isClipboard()) {
+                x.setIsClipboard(false);
+            }
+        }
+
+        c.setIsClipboard(true);
+        //saveCrimes();
+    }
+
+    public int getClipboardIndex() {
+        int i = 0;
+        for (TwFile x : mTwFiles) {
+            if (x.isClipboard()) {
+                break;
+            }
+            i++ ;
+        }
+       if(i == mTwFiles.size() ) return 0 ; // If there are no clipboards, use the first TW file
+        return i ;
+    }
+
     public void deleteTwFile(int i) {
         mTwFiles.remove(i);
     }

@@ -23,12 +23,27 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:text=""
         android:clickable="false"
         android:focusable="false"
+        android:text=""
         android:theme="@style/CheckBoxGray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <CheckBox
+        android:id="@+id/checkboxClip"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:clickable="false"
+        android:focusable="false"
+        android:text=""
+        android:theme="@style/CheckBoxGray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toLeftOf="@id/checkboxBrowse"
+        app:layout_constraintTop_toBottomOf="@id/checkboxBrowse"
+
+        />
 
     <TextView
         android:id="@+id/itemtitle"
@@ -42,10 +57,30 @@
         android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
         android:textAppearance="?android:attr/textAppearanceListItemSmall"
         android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@id/checkboxBrowse"
+        app:layout_constraintEnd_toStartOf="@+id/lblBrowse"
         app:layout_constraintStart_toEndOf="@id/iconView"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="SOME TEXT" />
+
+    <TextView
+        android:id="@+id/lblBrowse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Brw"
+
+        app:layout_constraintBaseline_toBaselineOf="@id/checkboxBrowse"
+        app:layout_constraintEnd_toStartOf="@id/checkboxBrowse" />
+
+
+    <TextView
+        android:id="@+id/lblClip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clp"
+        app:layout_constraintBaseline_toBaselineOf="@id/checkboxClip"
+
+        app:layout_constraintStart_toStartOf="@id/lblBrowse"
+        tools:text="Clp" />
 
 
 

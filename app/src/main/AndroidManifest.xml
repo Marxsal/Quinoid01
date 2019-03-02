@@ -10,7 +10,7 @@
     <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
     <uses-feature android:name="android.hardware.location.gps" />
 
-    <!-- TODO: TW-DOWNLOADS Research GEO permissions -->
+    <!-- TODO: TW-GEO Research GEO permissions -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_qt_cat"
@@ -37,7 +37,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- TODO: TW-DOWNLOADS Can we do this from TwActivity or need special action? -->
+
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />

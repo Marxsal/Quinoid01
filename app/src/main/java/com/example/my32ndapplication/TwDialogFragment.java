@@ -9,20 +9,19 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
 public class TwDialogFragment extends DialogFragment {
     static final String EXTRA_POSITION = "twFileIndex";
-    static final String LOG_TAG = "32XND";
+    static final String LOG_TAG = "32XND - TwDialogFragment";
 
     TwFile mTwFile;
     EditText mEditDisplayTitle ;
     CheckBox mCheckBoxDialogBrowse;
+    CheckBox mCheckBoxDialogClipboard;
     CheckBox mCheckBoxDialogDelete;
 
     TwDialogFragmentListener mListener ;
@@ -34,6 +33,7 @@ public class TwDialogFragment extends DialogFragment {
         mTwFile = TwManager.get(getActivity()).getTwFile(twFileIndex);
         String display = mTwFile.getDisplayName();
         boolean browseAble = mTwFile.isBrowsable();
+        boolean clipboard = mTwFile.isClipboard();
 
         View v = getActivity().getLayoutInflater().inflate(R.layout.tw_fragment_dialog, null);
 
@@ -42,6 +42,10 @@ public class TwDialogFragment extends DialogFragment {
 
         mCheckBoxDialogBrowse = v.findViewById(R.id.checkBoxDialogBrowse);
         mCheckBoxDialogBrowse.setChecked(browseAble);
+
+        mCheckBoxDialogClipboard   = v.findViewById(R.id.checkBoxDialogClip);
+        mCheckBoxDialogClipboard.setChecked(clipboard);
+
         mCheckBoxDialogDelete = v.findViewById(R.id.checkBoxDialogDelete);
 
         return new AlertDialog.Builder(getActivity())
@@ -56,6 +60,13 @@ public class TwDialogFragment extends DialogFragment {
                                     Log.d(LOG_TAG, "TDF...onClick: I just set display title: " + display);
 
                                 }
+                                if(mCheckBoxDialogClipboard.isChecked()) {
+                                    TwManager.get(getActivity()).setAsClipboard(mTwFile);
+                                    Log.d(LOG_TAG, "I'm trying to mark clipboard");
+                                }
+                                else
+                                    mTwFile.setIsClipboard(false);
+
                                 mTwFile.setIsBrowsable(mCheckBoxDialogBrowse.isChecked());
                                 if(mCheckBoxDialogDelete.isChecked()) TwManager.get(getActivity()).deleteTwFile(mTwFile);
                                 mListener.onDialogPositiveClick(TwDialogFragment.this);

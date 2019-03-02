@@ -195,14 +195,20 @@ public class TwFragment extends Fragment {
                 //String title = loadJavascript ("$tw.wiki.getTiddlerText('$:/SiteTitle')",titleSetter);
                 String icoText = loadJavascript ("$tw.wiki.getTiddlerText('$:/favicon.ico')",iconSetter);
                 String message = twFile.getMessage() ;
+                // TODO: TW-SHARE: Give clipboard unique name
+                // TODO: TW-SHARE: Save TW-file with clipboard
                 if(message != null && !message.isEmpty()) {
                     message = JSONObject.quote(message);
+                    String clipTiddler = TwUtils.get(getActivity()).makeRandomizedFileName("Quinoid-Clip", "");
                     String command =
                             "console.log('COMMAND 1');" +
                                     "var draftTiddler = new $tw.Tiddler( " +
-                                    "{ title: \"CLIPBOARD\",   text: " + message + "}, " +
+                                    "{ title: \"" + clipTiddler + "\",   text: " + message + "}, " +
                                     "$tw.wiki.getModificationFields()); " +
-                                    "$tw.wiki.addTiddler(draftTiddler);";
+                                    "$tw.wiki.addTiddler(draftTiddler);" +
+                                    "$tw.rootWidget.dispatchEvent({type: \"tm-auto-save-wiki\"}); " ;
+                    twFile.setMessage(""); // Clear message once it has been saved.
+                    //$tw.rootWidget.dispatchEvent({type: "tm-auto-save-wiki"});
                     Log.d(LOG_TAG, "Javascript - about to create tiddler with message: " + message);
                     loadJavascript(command, nullSetter);
                 }

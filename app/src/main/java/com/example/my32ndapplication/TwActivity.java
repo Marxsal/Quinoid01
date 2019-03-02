@@ -84,14 +84,17 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
 
                 Log.d(LOG_TAG, "I see incoming intent !!");
 
-                // TODO: TW-DOWNLOADS change file fetched from hard-coded to user-selected
-                TwFile twFile = mTwFiles.get(1);
+                int position = TwManager.get(this).getClipboardIndex() ;
+                TwFile twFile = mTwFiles.get(position);
 
                 String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-                String message = twFile.getMessage() + "----" + sharedText;
+                String message = twFile.getMessage() + "\n" + sharedText;
 
                 Log.d(LOG_TAG, "Setting up return message: " + message);
                 twFile.setMessage(message);
+
+                // TODO: TW-SHARE After stashing shared value, SAVE the state of all tw files
+                TwManager.get(this).saveTwFilesToJSON() ;
                 finish();
             }
         }
@@ -208,7 +211,7 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
                 intent.putExtra("exit", true);
                 startActivity(intent);
 
-            // TODO: Menu Exit option (TW-DOWNLOADS) #DONE
+            // DONE: Menu Exit option (TW-DOWNLOADS)
 
             default:
 
@@ -283,7 +286,7 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
     }
 
 
-    // TODO: Move code from onBackPressed to exit option (TW-DOWNLOADS #CURRENT)
+    // DONE: Move code from onBackPressed to exit option (TW-DOWNLOADS #CURRENT)
 //    @Override
 //    public void onBackPressed() {
 //        Intent intent = new Intent(this, TwActivity.class);
@@ -482,6 +485,10 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
             titleView.setText(twFile.toString());
             CheckBox checkBoxBrowse = (CheckBox) convertView.findViewById(R.id.checkboxBrowse);
             checkBoxBrowse.setChecked(twFile.isBrowsable());
+
+            CheckBox checkBoxClipboard = (CheckBox) convertView.findViewById(R.id.checkboxClip);
+            checkBoxClipboard.setChecked(twFile.isClipboard());
+
             if (twFile.getIconPath() != null && !twFile.getIconPath().isEmpty()) {
                 ImageView imageView = (ImageView) convertView.findViewById(R.id.iconView);
                 Bitmap bitmap = BitmapFactory.decodeFile(twFile.getIconPath());

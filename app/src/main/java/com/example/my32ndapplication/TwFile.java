@@ -28,6 +28,11 @@ public class TwFile {
     private static final String JSON_IS_BROWSABLE = "isbrowsable";
     private static final String JSON_DISPLAY_TITLE = "displaytitle";
     private static final String JSON_ICON_PATH = "iconpath";
+    private static final String JSON_IS_CLIPBOARD = "isclipboard";
+    private static final String JSON_MESSAGE = "message";
+
+    //DONE - SAVE JSON for CLIPBOARD
+    //DONE - Make methods in TW Manager to select and set just one TW as clipboard
 
     private String mTitle = DEFAULT_TITLE;
     private String mId;
@@ -36,7 +41,7 @@ public class TwFile {
     private boolean mIsBrowsable ; // Will we be loading a page for this item?
     private String mIconPath = "" ;
     private String mMessage = ""  ; // Message/clip to be added to file once opened
-
+    private boolean mIsClipboard ; // Indicates this TW is to be target of clipboard. TW Manager should make sure only one is chosen.
 
     public String getMessage() {
         return mMessage;
@@ -72,7 +77,13 @@ public class TwFile {
     }
 
 
+    public boolean isClipboard() {
+        return mIsClipboard;
+    }
 
+    public void setIsClipboard(boolean mIsClipboard) {
+        this.mIsClipboard = mIsClipboard;
+    }
 
     // Constructor, I hope. Used when resource/filepath is first selected
     // from pick list.
@@ -125,6 +136,8 @@ public class TwFile {
         mDisplay = json.getString(JSON_DISPLAY_TITLE);
         mIsBrowsable = json.getBoolean(JSON_IS_BROWSABLE);
         mIconPath = json.getString(JSON_ICON_PATH);
+        mIsClipboard = json.getBoolean(JSON_IS_CLIPBOARD);
+        mMessage = json.getString(JSON_MESSAGE) ;
         loadFilePath(c);
         if(!mId.startsWith("content")) setUnschemedFilePath(mId);
     }
@@ -285,6 +298,8 @@ public class TwFile {
         json.put(JSON_DISPLAY_TITLE, mDisplay.toString());
         json.put(JSON_IS_BROWSABLE, mIsBrowsable);
         json.put(JSON_ICON_PATH, mIconPath.toString());
+        json.put(JSON_IS_CLIPBOARD, mIsClipboard);
+        json.put(JSON_MESSAGE, mMessage);
 
         return json;
 
