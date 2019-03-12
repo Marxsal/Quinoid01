@@ -24,10 +24,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.ValueCallback;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -51,7 +47,9 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
     public static final String LAUNCH_PAGE = "PagerView Launch Page Position";
     public static final String EXTRA_MESSAGE = "com.example.my32ndapplication.MESSAGE";
     public static final String AUTHORITY = "com.example.my32ndapplication.provider"; // Needed by FileUtils2 and file provider
-public static final long REFERENCE_UNAVAILABLE = -1 ;
+    public static final String RESOURCE_LIST_FILE = "TwResources.json";
+
+    public static final long REFERENCE_UNAVAILABLE = -1 ;
     public static final String TW_SUBDIR = "TwFiles";
     public static TwUtils sTwUtils ;
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE = 42;
@@ -60,6 +58,9 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
     private long downloadReference ;
 
     private ArrayList<TwFile> mTwFiles;
+
+    private ArrayList<TwResource> mTwResources ; // ONLY DURING TESTING. THIS SHOULD GO INTO THE ASSOCIATED DIALOG CLASS
+
     private Map<Long, TwFile> mTwDownloads = new HashMap<Long, TwFile>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +72,23 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
         if (intent.hasExtra("exit")) finish();
 
         sTwUtils = TwUtils.get(this);
+
+sTwUtils.copySpecificAssets();
+
+//String resourceFile = (new File(sTwUtils.getTWDocumentPath(TW_SUBDIR),RESOURCE_LIST_FILE)).toString() ;
+//        Log.d(LOG_TAG, "I see resource file name: " + resourceFile);
+//
+//        mTwResources = TwResource.loadTwResourceFromJSON(resourceFile);
+//
+//        if(mTwResources == null || mTwResources.isEmpty()) {
+//
+//            Log.d(LOG_TAG, "Resources empty!");
+//        }
+//        Log.d(LOG_TAG, "Resources retrieved, maybe");
+//        TwResource tempResource = mTwResources.get(0);
+//        if(tempResource != null)
+//        Log.d(LOG_TAG, "Resource title is: " + tempResource.getTitle());
+
 
         mTwFiles = TwManager.get(this).getTwFiles();
 
@@ -192,15 +210,20 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
                     return true;
                 }
 
+                Intent intentResource = new Intent(this, TwResourceActivity.class);
+                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                //intent.putExtra("exit", true);
+                startActivity(intentResource);
+
 //                String twFilePath = sTwUtils.getTWInternalStoragePathname("internals") ;
 //                if ( twFilePath == null ) {
 //                    sTwUtils.makeToast("Not able to obtain storage.");
 //                    return true;
 //                }
 
-                String fileName = sTwUtils.makeRandomizedFileName("empty", ".html");
-                File dirPath = sTwUtils.getTWDocumentPath(TW_SUBDIR);
-                downloadReference = DownloadTw("https://tiddlywiki.com/empty", dirPath, fileName ,"Basic - empty TW") ;
+//                String fileName = sTwUtils.makeRandomizedFileName("empty", ".html");
+//                File dirPath = sTwUtils.getTWDocumentPath(TW_SUBDIR);
+//                downloadReference = DownloadTw("https://tiddlywiki.com/empty", dirPath, fileName ,"Basic - empty TW") ;
 
                 return true ;
 
@@ -219,71 +242,7 @@ public static final long REFERENCE_UNAVAILABLE = -1 ;
         }
     }
 
-    private  long DownloadTw(String pUrl,File pFilePath, String pFileName ,String pDescription) {
 
-        Uri uri = Uri.parse(pUrl);
-
-        long downloadReference;
-
-        // Downloading to internal instead.
-//        // Make isExternalStorageWritable part of the getTWExternalStoragePublicDirPathname logic
-//        if (! sTwUtils.isExternalStorageWritable()) {
-//            sTwUtils.makeToast("This operation requires external storage.");
-//            return 0 ;
-//        } else {
-//            Log.d(LOG_TAG, "Apparently I think there is external storage.");
-//        }
-
-
-//        String twFilePath = sTwUtils.getTWExternalStoragePublicDirPathname() ;
-//        if ( twFilePath == null ) {
-//            sTwUtils.makeToast("Not able to obtain external public storage.");
-//            return REFERENCE_UNAVAILABLE ;
-//        }
-//
-//        twFilePath = twFilePath + "/" + sTwUtils.makeRandomizedFileName(pFileStem, ".html");
-
-
-        // Create request for android download manager
-        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        DownloadManager.Request request = new DownloadManager.Request(uri);
-
-        //Setting title of request
-        request.setTitle("Download file"  );
-
-        //Setting description of request
-        request.setDescription("Download: " + pDescription);
-
-        //Set the local destination for the downloaded file to a path within the application's external files directory
-//        if (v.getId() == R.id.DownloadMusic)
-//            request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, "AndroidTutorialPoint.mp3");
-//        else if (v.getId() == R.id.DownloadImage)
-//            request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, "AndroidTutorialPoint.jpg");
-
-        //request.setDestinationInExternalFilesDir(TwActivity.this, Environment.DIRECTORY_DOWNLOADS, "TW-test.html");
-        //File file = new File(TwUtils.get(this).getTWExternalStoragePublicDirPathname(), "TW-test.html");
-        File file = new File(pFilePath,pFileName);
-        //request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "TW-test.html");
-        Log.d(LOG_TAG, "I think requesting this file path: " + file.getPath());
-        Log.d(LOG_TAG, "I think requesting this file : " + file.getName() );
-
-
-        request.setDestinationUri(Uri.fromFile(file));
-        //Enqueue download and save into referenceId
-        downloadReference = downloadManager.enqueue(request);
-
-        TwFile twFile = new TwFile(this, file.getPath());
-        twFile.setTitle(pDescription);
-        mTwDownloads.put(downloadReference, twFile);
-
-
-//        Button DownloadStatus = (Button) findViewById(R.id.DoSwnloadStatus);
-//        DownloadStatus.setEnabled(true);
-//        Button CancelDownload = (Button) findViewById(R.id.CancelDownload);
-//        CancelDownload.setEnabled(true);
-
-        return downloadReference;
-    }
 
 
     // DONE: Move code from onBackPressed to exit option (TW-DOWNLOADS #CURRENT)

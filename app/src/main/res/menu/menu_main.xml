@@ -18,7 +18,7 @@
     <item
         android:id="@+id/download_empty"
         android:orderInCategory="160"
-        android:title="Download test"
+        android:title="Resources"
         app:showAsAction="never" />
 
     </group>

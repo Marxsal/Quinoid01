@@ -1,4 +1,4 @@
-# Quinoid
+# Quinoid 0.0.8alpha
 
 **Application to use TiddlyWiki on Android**
 
@@ -7,17 +7,25 @@ After Android 4.4 (KitKat) the Android permissions and file access model changed
 TiddlyWiki could not always save. 
 This project will hopefully work better with the new permissions model.
 
-In addition, thinking about additonal aspirational directions:
+## Features
 
 * Switch active page by swiping (working)
-* Access to files provided by the new system explorer, enabling access to services such as GDrive. (working?)
-* Display TW file information (partially working - no plans to continue)
-* Select which files are active for swiping. (working?)
-* Link to external websites (working -- user chooses browser)
+* List active TW files in working list, using your own preferred title.
+* Hand off links to external websites to other browsers
+* Select which files should be used in browse (swipe) mode.
+* Display TW files' favicon, if available
+* Access to files provided by the Android system explorer, enabling access to services such as GDrive. (working?)
 * Create local files based on editions (in progess)
 * Configurable list of TW files that can be downloaded on demand (next?)
 * Auto-load files from directory (working?).
-* Capture text shared from other apps (working?) .
+* Capture text shared from other apps via Android sharing .
+* Import tiddlers, plugins, etc.
+
+## Aspirational / roadmap
+
+* Serve up files? Maybe.
+* Light file maintenance - physically delete TW's no longer wanted.
+* User preferences to automatically open in browsing session
 
 ## DISCLAIMER
 
@@ -56,10 +64,18 @@ Note really well: The text that is captured is *not* transferred to the target T
 
 ### Using the File downloader and auto-loading of TW-files.
 
-Under the activity-bar 3-dot menu, you can tell Quinoid to download an empty file. If you are connected to the internet it will fetche the latest empty release. It will save this to a TwFiles sub-folder of your public documents folder. This subfolder may be on your physical internal drive or your external drive, depending on Android version and manufacturer. I targeted the external drive, but as far as I can tell, I don't have full control.  I'll be interested in hearing reports back.
+Under the activity-bar 3-dot menu, you can select "Resources" which will allow you to download one or more pre-existing starter files. Click on "Resources" and then click on whatever items you are interested in. If you are connected to the internet the downloads should start immediately. The file(s) will be saved to a TwFiles sub-folder of your public documents folder. This subfolder may be on your physical internal drive or your external drive, depending on Android version and manufacturer. I targeted the external drive, but as far as I can tell, I (the developer) don't have full control.  I'll be interested in hearing reports back.
 
 Whatever location is chosen, any TW files (or html files) placed in that directory will be automatically added to Quinoid's file list upon start-up.  
- 
+
+### Configuring Downloadable File List
+
+The first time Quinoid is loaded on your device, a new resource file (TwResources.json) will be created in the same directory mentioned above for downloading resource files. It contains a handful of existing sites (including possibly this help file). This file is in JSON format. If you are comfortable with JSON, you can edit the JSON file to create your own list of starter files. For instance, you might want to have an "empty" pre-release file, rather than an empty release file to work with. Or, if you are a gamer, you might want to download a new gaming TW for each game you want to track. Or you might provide your own curated list of files to friends and colleagues.
+
+Currently the TwResources file is very simple, containing only the three properties, "id", "title", and "description". "id" represents the path to the file you wish to download. "title" is the short title that will be displayed in the menu, and "description" is a longer field for explaining the nature of the target HTML file.
+
+The main thing to keep in mind is that the file must follow the "real" rules of JSON. Certain characters may have to be escaped. In particular, when making file paths, each forward slash (/) must be prefixed by a backward slash, thusly: \/ . Breaking the JSON will probably mean that no menu will appear when you click on the "Resources" menu item.
+
 ### Notes about GDrive
 
 I don't use GDrive myself very much. I've only been testing it in emulators. The behavior in emulators may be different than the behavior on actual devices. Based on several observations, it appears possible that a TW file that has been accessed by Quinoid from GDrive may not send back a date stamp. Thus it appears a prudent course to follow after using GDrive in offline mode goes something like:
@@ -69,4 +85,5 @@ I don't use GDrive myself very much. I've only been testing it in emulators. The
 3. Click on the "Reload/Recycle" button. GDrive will announce that it is uploading your file.
 4. Switch your file to "offline" again if you continue to work in Quinoid.
 
-It also appears that you don't need to use your file in offline mode at all if you are continously connected to the internet. However, I haven't tested this and am not sure what happens when you "walk" out of internet range. In all cases, be careful. Don't commit any work that you really want to keep.
+It also appears that you don't need to use your file in offline mode at all if you are continously connected to the internet. However, I haven't tested this and am not sure what happens when you "walk" out of internet range. In all cases, be careful. Don't commit any work that you really want to keep.# Quinoid
+

@@ -5,7 +5,7 @@
     <string name="action_settings">Settings</string>
     <string name="button_launch">System Explorer</string>
     <string name="preferences_string">PREFERENCES-STRING</string>
-    <string name="dialog_title" >CHOICES</string>
+    <string name="dialog_title">CHOICES</string>
     <string name="dialog_label_display_title">Use this title for display:</string>
     <string name="dialog_confirm_button">Confirm</string>
     <string name="dialog_cancel_button">Cancel</string>

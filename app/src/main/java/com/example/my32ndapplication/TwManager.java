@@ -199,6 +199,7 @@ public class TwManager {
         }
 
         for (File realFile : tempFile.listFiles()) {
+            if(realFile.getName().endsWith(".json")) continue;
                 if(arrayList.contains(realFile.getAbsoluteFile().toString()))
                     Log.d(LOG_TAG, "addFromdocumentDir: I HAVE FOUND:" + realFile.getAbsoluteFile() + "XXX");
                 else

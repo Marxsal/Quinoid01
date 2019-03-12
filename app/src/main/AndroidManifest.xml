@@ -5,7 +5,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
     <uses-feature android:name="android.hardware.location.gps" />
@@ -18,7 +17,6 @@
         android:roundIcon="@mipmap/ic_qt_cat_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -37,10 +35,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
@@ -53,20 +52,16 @@
         </activity>
         <activity
             android:name=".TwPagerActivity"
-android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="orientation|screenSize"
-            >
-
-
-        </activity>
-
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name="com.nononsenseapps.filepicker.FilePickerActivity"
             android:label="@string/app_name"
-            android:theme="@style/FilePickerTheme">
-
-        </activity>
-
+            android:theme="@style/FilePickerTheme"></activity>
+        <activity
+            android:name=".TwResourceActivity"
+            android:label="Quinoid - Click to Download Resource"
+            ></activity>
     </application>
 
 </manifest>
