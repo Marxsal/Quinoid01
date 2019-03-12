@@ -3,7 +3,7 @@
 **Application to use TiddlyWiki on Android**
 
 After Android 4.4 (KitKat) the Android permissions and file access model changed.
- This meant that the older Android  (unnamed) application for
+ This meant that older Android  (unnamed) applications for
 TiddlyWiki could not always save. 
 This project will hopefully work better with the new permissions model.
 
@@ -37,7 +37,12 @@ In all cases, it is up to you to properly backup and secure your files.
 
 ## Usage Notes
 
-Note that there are two file selection mechanisms. "File Explorer" and "System Exlorer". "File Explorer" is now inside the overflow menu. The "System Explorer" appears as a "+" icon on the action bar. __File Explorer__ will probably only work
+**Intallation note:** 
+On some versions of Android, you may need to go into the application manager and grant yourself storage permissions.
+
+**Finding and opening existing files:** 
+Note that there are two file selection mechanisms. "File Explorer" and "System Exlorer". "File Explorer" is now inside the overflow menu. 
+The "System Explorer" appears as a "+" icon on the action bar. __File Explorer__ will probably only work
 with files that Android considers "internal". This is due to changes in Android permissons starting with Android 4.4.
 However, the __File Explorer__ is probably more efficient than __System Explorer__, so if you can get it to work that might be the first choice. In future editions,
 the __File Explorer__ may be disabled for Android 5 and greater.
@@ -66,13 +71,20 @@ Note really well: The text that is captured is *not* transferred to the target T
 
 Under the activity-bar 3-dot menu, you can select "Resources" which will allow you to download one or more pre-existing starter files. Click on "Resources" and then click on whatever items you are interested in. If you are connected to the internet the downloads should start immediately. The file(s) will be saved to a TwFiles sub-folder of your public documents folder. This subfolder may be on your physical internal drive or your external drive, depending on Android version and manufacturer. I targeted the external drive, but as far as I can tell, I (the developer) don't have full control.  I'll be interested in hearing reports back.
 
-Whatever location is chosen, any TW files (or html files) placed in that directory will be automatically added to Quinoid's file list upon start-up.  
+After making your selections, use the "back" button of your device to return to the main TW file browse list. The new files should appear within a few moments, if all goes well.
+
+Whatever location is chosen, any TW files (or html files) placed in the TwFiles sub-directory will be automatically added to Quinoid's file list upon start-up.  
 
 ### Configuring Downloadable File List
 
 The first time Quinoid is loaded on your device, a new resource file (TwResources.json) will be created in the same directory mentioned above for downloading resource files. It contains a handful of existing sites (including possibly this help file). This file is in JSON format. If you are comfortable with JSON, you can edit the JSON file to create your own list of starter files. For instance, you might want to have an "empty" pre-release file, rather than an empty release file to work with. Or, if you are a gamer, you might want to download a new gaming TW for each game you want to track. Or you might provide your own curated list of files to friends and colleagues.
 
-Currently the TwResources file is very simple, containing only the three properties, "id", "title", and "description". "id" represents the path to the file you wish to download. "title" is the short title that will be displayed in the menu, and "description" is a longer field for explaining the nature of the target HTML file.
+Currently the TwResources file is very simple, containing only the four properties, "id", "title", "description", and "filestem":
+
+* "id" represents the URL to the file you wish to download. 
+* "title" is the short title that will be displayed in the menu
+* "description" is a longer field for explaining the nature of the target HTML file.
+* "filestem" is the generic, simple file name for the file without the ".html" ending. It is used in naming the downloaded file, since the source URL will often not have a suitable, simple name.
 
 The main thing to keep in mind is that the file must follow the "real" rules of JSON. Certain characters may have to be escaped. In particular, when making file paths, each forward slash (/) must be prefixed by a backward slash, thusly: \/ . Breaking the JSON will probably mean that no menu will appear when you click on the "Resources" menu item.
 

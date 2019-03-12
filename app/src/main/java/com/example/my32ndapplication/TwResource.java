@@ -38,9 +38,10 @@ public class TwResource {
             Log.d(LOG_TAG, "Resources empty!");
         }
         Log.d(LOG_TAG, "Resources retrieved, maybe");
-        TwResource tempResource = mTwResources.get(1);
-        if(tempResource != null)
-            Log.d(LOG_TAG, "Resource title is: " + tempResource.getTitle());
+
+//        TwResource tempResource = mTwResources.get(1);
+//        if(tempResource != null)
+//            Log.d(LOG_TAG, "Resource title is: " + tempResource.getTitle());
 
     }
     //DONE - SAVE JSON for CLIPBOARD

@@ -26,7 +26,9 @@ implements  TwResourceFragment.OnListFragmentInteractionListener {
         String fileName = TwUtils.get(this).makeRandomizedFileName(twResource.getFileStem(), ".html");
         File dirPath = TwUtils.get(this).getTWDocumentPath(TwActivity.TW_SUBDIR);
 
-        long downloadReference = TwUtils.get(this).   DownloadTw("https://tiddlywiki.com/empty", dirPath, fileName ,"Basic - empty TW") ;
+        long downloadReference = TwUtils.get(this).DownloadTw(twResource.getId(), dirPath, fileName, twResource.getTitle());
+
+               // DownloadTw("https://tiddlywiki.com/empty", dirPath, fileName ,"Basic - empty TW") ;
 
 
         Log.d(LOG_TAG, twResource.getTitle());

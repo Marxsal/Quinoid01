@@ -61,7 +61,7 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
 
     private ArrayList<TwResource> mTwResources ; // ONLY DURING TESTING. THIS SHOULD GO INTO THE ASSOCIATED DIALOG CLASS
 
-    private Map<Long, TwFile> mTwDownloads = new HashMap<Long, TwFile>();
+    public static Map<Long, TwFile> sTwDownloads = new HashMap<Long, TwFile>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -468,14 +468,14 @@ sTwUtils.copySpecificAssets();
 
             Log.d(LOG_TAG, "Broadcast received:" + referenceId);
 
-            TwFile twFile = mTwDownloads.get(new Long(referenceId));
+            TwFile twFile = sTwDownloads.get(new Long(referenceId));
             if(twFile != null ) {
                 Log.d(LOG_TAG, "broadcastReceiver - Adding twfile to list");
                 TwManager.get(TwActivity.this).addTwFile(twFile);
                 TwManager.get(TwActivity.this).saveTwFilesToJSON() ;
                 ListView listView = findViewById(R.id.listview);
                 ((ArrayAdapter<TwFile>) listView.getAdapter()).notifyDataSetChanged();
-                mTwDownloads.remove(new Long(referenceId))  ;
+                sTwDownloads.remove(new Long(referenceId))  ;
 
             }
             //list.remove(referenceId);

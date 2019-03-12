@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
+import static android.content.Context.DOWNLOAD_SERVICE;
+
 public class TwUtils {
 
     static TwUtils sTwUtils;
@@ -184,7 +186,7 @@ public class TwUtils {
         }
     }
 
-    private  long DownloadTw(String pUrl,File pFilePath, String pFileName ,String pDescription) {
+    public   long DownloadTw(String pUrl,File pFilePath, String pFileName ,String pDescription) {
 
         Uri uri = Uri.parse(pUrl);
 
@@ -210,7 +212,8 @@ public class TwUtils {
 
 
         // Create request for android download manager
-        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        //DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        DownloadManager downloadManager = (DownloadManager) mAppContext.getSystemService(DOWNLOAD_SERVICE) ;
         DownloadManager.Request request = new DownloadManager.Request(uri);
 
         //Setting title of request
@@ -237,9 +240,11 @@ public class TwUtils {
         //Enqueue download and save into referenceId
         downloadReference = downloadManager.enqueue(request);
 
-        TwFile twFile = new TwFile(this, file.getPath());
+        //TwFile twFile = new TwFile(this, file.getPath());
+        TwFile twFile = new TwFile(mAppContext, file.getPath());
+
         twFile.setTitle(pDescription);
-        mTwDownloads.put(downloadReference, twFile);
+        TwActivity.sTwDownloads.put(downloadReference, twFile);
 
 
 //        Button DownloadStatus = (Button) findViewById(R.id.DoSwnloadStatus);
