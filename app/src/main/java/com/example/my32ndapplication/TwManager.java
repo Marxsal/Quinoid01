@@ -1,7 +1,12 @@
 package com.example.my32ndapplication;
 
+import android.Manifest;
+import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -184,13 +189,31 @@ public class TwManager {
         }
     }
 
-    private void addFromDocumentDir(Context cntx) {
+    public void addFromDocumentDir(Context cntx) {
+
+        if(!TwActivity.ReadWritePermissionGranted) {
+            if (ContextCompat.checkSelfPermission(cntx,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Log.d(LOG_TAG, "It thinks it needs write permission.");
+
+                TwUtils.get(cntx).makeToast("Do not have permission to load from ext. directory.");
+                return;
+
+            }
+
+        }
+
+
         File tempFile = TwUtils.get(cntx).getTWDocumentPath(TwActivity.TW_SUBDIR) ;
         Log.d(LOG_TAG, "Checking directory: " + tempFile.getAbsolutePath());
         //File tempFile = cntx.getDir("provided", Context.MODE_PRIVATE).getAbsoluteFile();
         ArrayList<String>  arrayList = new ArrayList<String>();
 
-        //ArrayList<TwFile> lTwFiles = TwManager.get(cntx).getTwFiles() ;
+
+
+
+            //ArrayList<TwFile> lTwFiles = TwManager.get(cntx).getTwFiles() ;
         for (TwFile tf : mTwFiles) {
             arrayList.add(tf.getUnschemedFilePath()) ;
 //            Log.d(LOG_TAG,"addFromDocumentDir: I see saved file " + tf.getUnschemedFilePath()) ;

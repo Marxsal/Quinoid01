@@ -49,6 +49,8 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
     public static final String AUTHORITY = "com.example.my32ndapplication.provider"; // Needed by FileUtils2 and file provider
     public static final String RESOURCE_LIST_FILE = "TwResources.json";
 
+
+    public static boolean ReadWritePermissionGranted ;
     public static final long REFERENCE_UNAVAILABLE = -1 ;
     public static final String TW_SUBDIR = "TwFiles";
     public static TwUtils sTwUtils ;
@@ -73,6 +75,20 @@ public class TwActivity extends AppCompatActivity implements TwDialogFragment.Tw
 
         sTwUtils = TwUtils.get(this);
 
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.d(LOG_TAG, "It thinks it needs write permission. I'll try asking.");
+            ActivityCompat.requestPermissions((TwActivity) this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                    TwActivity.REQUEST_WRITE_EXTERNAL_STORAGE);
+        } else {
+            ReadWritePermissionGranted = true ;
+        }
+
+
+
 sTwUtils.copySpecificAssets();
 
 //String resourceFile = (new File(sTwUtils.getTWDocumentPath(TW_SUBDIR),RESOURCE_LIST_FILE)).toString() ;
@@ -88,6 +104,7 @@ sTwUtils.copySpecificAssets();
 //        TwResource tempResource = mTwResources.get(0);
 //        if(tempResource != null)
 //        Log.d(LOG_TAG, "Resource title is: " + tempResource.getTitle());
+
 
 
         mTwFiles = TwManager.get(this).getTwFiles();
@@ -262,6 +279,8 @@ sTwUtils.copySpecificAssets();
             case REQUEST_WRITE_EXTERNAL_STORAGE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d(LOG_TAG, "onRequestPermissionResult says permission granted.");
+                    ReadWritePermissionGranted = true ;
+                    TwManager.get(this).addFromDocumentDir(this);
                 } else {
                     Log.d(LOG_TAG, "onRequestPermissionResult says permission NOT granted.");
                 }
