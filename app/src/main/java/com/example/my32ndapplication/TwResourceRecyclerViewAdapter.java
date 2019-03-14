@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.my32ndapplication.TwResourceFragment.OnListFragmentInteractionListener;
-import com.example.my32ndapplication.dummy.DummyContent.DummyItem;
+//import com.example.my32ndapplication.dummy.DummyContent.DummyItem;
 
 import java.util.ArrayList;
 import java.util.List;
