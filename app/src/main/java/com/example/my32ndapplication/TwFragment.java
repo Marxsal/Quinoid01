@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -142,6 +143,7 @@ public class TwFragment extends Fragment {
 
         webSettings.setJavaScriptEnabled(true);
         webSettings.setAllowFileAccess(true);
+        webView.getSettings().setGeolocationDatabasePath( getActivity().getFilesDir().getPath() );
         webView.getSettings().setBuiltInZoomControls(true);
         webView.getSettings().setDisplayZoomControls(false);
         final MyAction titleSetter = new MyAction() {
@@ -225,6 +227,12 @@ public class TwFragment extends Fragment {
         webView.loadUrl(temp);
 
         webView.setWebChromeClient(new WebChromeClient() {
+
+            @Override
+                public void onGeolocationPermissionsShowPrompt(String origin,android.webkit.GeolocationPermissions.Callback callback) {
+                    callback.invoke(origin, true, false);
+                }
+
 
             //handling input[type="file"] requests for android API 16+
             @SuppressLint("ObsoleteSdkInt")
